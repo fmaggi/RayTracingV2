@@ -37,3 +37,6 @@ bin/*
 bin_int/*
 */Makefile
 Makefile
+compile_commands.json
+.cache/*
+raytrace

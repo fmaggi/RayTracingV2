@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <string>
 
+#include "ray.h"
+
 int main(int argc, char** argv) {
 	std::printf("Hello raytraced world\n");
 

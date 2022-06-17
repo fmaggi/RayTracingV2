@@ -12,10 +12,14 @@ workspace 'RayTrace'
 	warnings			'Extra'
 	floatingpoint		'Fast'
 	staticruntime		'On'
-	files				{
-							'src/**.cpp',
-							'src/**.h',
-						}
+
+	files {
+			'src/**.cpp',
+			'src/**.h',
+			'vendor/glm/glm/**.hpp',
+			'vendor/glm/glm/**.inl'
+	}
+
 	debugdir			('bin/'	 .. output_dir .. '/%{prj.name}')
 	targetdir			('bin/'	 .. output_dir .. '/%{prj.name}')
 	objdir				('bin_int/' .. output_dir .. '/%{prj.name}')
@@ -45,5 +49,5 @@ workspace 'RayTrace'
 project 'raytrace'
 	location			'src'
 	kind				'ConsoleApp'
-	includedirs			{ '', 'src'}
+	includedirs			{ '', 'src', 'vendor/glm'}
 

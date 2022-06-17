@@ -35,3 +35,4 @@ tags
 output/*
 bin/*
 bin_int/*
+*/Makefile

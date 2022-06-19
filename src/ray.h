@@ -11,7 +11,7 @@ struct Ray {
 		return origin + t * direction;
 	}
 
-  const	glm::vec3 origin;
-  const	glm::vec3 direction;
+	const glm::vec3 origin;
+	const glm::vec3 direction;
 };
 

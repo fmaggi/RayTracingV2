@@ -14,7 +14,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 lookAt, glm::vec3 Vup, float vfov, 
 	float viewportHeight = h * 2;
 	float viewportWidth = viewportHeight * aspectRatio;
 
-	glm::vec3 direction = glm::normalize(lookAt - m_position);
+	glm::vec3 direction = glm::normalize(m_position - lookAt);
 
 	glm::vec3 w = direction;
 	glm::vec3 u = glm::normalize(glm::cross(Vup, w));

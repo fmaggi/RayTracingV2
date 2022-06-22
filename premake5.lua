@@ -43,9 +43,6 @@ workspace 'RayTrace'
 	filter "system:windows"
 		systemversion "latest"
 
-	filter "system:linux"
-		toolset("clang")
-
 project 'raytrace'
 	location			'src'
 	kind				'ConsoleApp'

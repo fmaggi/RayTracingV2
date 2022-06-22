@@ -6,7 +6,7 @@
 #include <functional>
 
 template<typename T>
-concept HittableBaseClass = std::convertible_to<T*, Hittable*>;
+concept HittableBaseClass = std::derived_from<T, Hittable>;
 
 class Scene {
 public:

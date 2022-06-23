@@ -30,15 +30,13 @@ int main(int argc, char** argv) {
 	// int w = 400;
 	// int h = 400 / a;
 
-	std::string path = "output/" + std::string(argv[1]);
-	FILE* image = std::fopen(path.c_str(), "w");
 
 	int numberOfRays = 300;
-	Camera camera(glm::vec3(0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 70, a);
+	Camera camera(glm::vec3(0.0f, 3.0f, 1.5f), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 70, a);
 	int w = camera.viewportWidth() * numberOfRays;
 	int h = camera.viewportHeight() * numberOfRays;
 
-	std::fprintf(image, "P3\n%i %i\n255\n", w, h);
+	uint8_t* im = new uint8_t[w * h * 3];
 
 	Scene scene;
 	scene.setBackgroundColor(
@@ -51,15 +49,23 @@ int main(int argc, char** argv) {
 	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f);
 	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100);
 
-	for (int i = h-1; i > -1; i--){
+	for (int i = 0; i < h; i++){
 		for (int j = 0; j < w; j++) {
 			glm::vec3 color{};
-			for (int k = 0; k < 100; k++) {
+			for (int k = 0; k < 8; k++) {
 				float u = (float) (j + Math::random<float>()) / (w-1);
 				float v = (float) (i + Math::random<float>()) / (h-1);
-				color += normalizeColor(ray_color(camera.castRay(u, v), scene), 100);
+				color += normalizeColor(ray_color(camera.castRay(u, v), scene), 8);
 			}
-			std::fprintf(image, "%i %i %i\n", (int)(color.r*255), (int)(color.g*255), (int)(color.b*255));
+			uint64_t pixel = (h-i)*w*3 + j*3;
+			im[pixel + 0] = (uint8_t)(color.r * 255);
+			im[pixel + 1] = (uint8_t)(color.g * 255);
+			im[pixel + 2] = (uint8_t)(color.b * 255);
 		}
 	}
+
+	std::string path = "output/" + std::string(argv[1]);
+	FILE* image = std::fopen(path.c_str(), "wb");
+	std::fprintf(image, "P6\n%i %i\n255\n", w, h);
+	std::fwrite(im, sizeof(uint8_t), w*h*3, image);
 }

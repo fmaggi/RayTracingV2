@@ -1,6 +1,7 @@
 #include <object.h>
 
 #include "glm/glm.hpp"
+#include "ray.h"
 #include <cstdio>
 std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const {
 	glm::vec3 oc = ray.origin - m_position;
@@ -21,6 +22,6 @@ std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const 
 	HitInfo info;
 	info.t = t;
 	info.p = ray.at(t);
-	info.n = (info.p - m_position) / m_radius;
+	info.n = normalDirection(ray, (info.p - m_position) / m_radius);
 	return info;
 }

@@ -4,16 +4,23 @@
 #include <string>
 
 #include "Camera.h"
+#include "glm/geometric.hpp"
 #include "glm/glm.hpp"
 #include "object.h"
 #include "scene.h"
 #include "utils/math.h"
 #include "shader.h"
 
-glm::vec3 ray_color(Ray ray, Scene& scene) {
+glm::vec3 ray_color(Ray ray, Scene& scene, int depth) {
+	if (depth <= 0) {
+		return glm::vec3(0);
+	}
+
   auto info = scene.intersect(ray);
   if (info){
-		return 0.5f * (info->n + glm::vec3(1,1,1));
+		glm::vec3 dir = info->n + Math::randomInUnitSphere();
+		Ray reflection(info->p, dir);
+		return 0.5f * ray_color(reflection, scene, depth--);
   }
 	return scene.backgroundColor(ray);
 }
@@ -32,7 +39,7 @@ int main(int argc, char** argv) {
 
 
 	int numberOfRays = 300;
-	Camera camera(glm::vec3(0.0f, 3.0f, 1.5f), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 70, a);
+	Camera camera(glm::vec3(0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 70, a);
 	int w = camera.viewportWidth() * numberOfRays;
 	int h = camera.viewportHeight() * numberOfRays;
 
@@ -55,9 +62,10 @@ int main(int argc, char** argv) {
 			for (int k = 0; k < 8; k++) {
 				float u = (float) (j + Math::random<float>()) / (w-1);
 				float v = (float) (i + Math::random<float>()) / (h-1);
-				color += normalizeColor(ray_color(camera.castRay(u, v), scene), 8);
+				color += ray_color(camera.castRay(u, v), scene, 50);
 			}
-			uint64_t pixel = (h-i)*w*3 + j*3;
+			color = normalizeColor(color, 8);
+			uint64_t pixel = (h-i-1)*w*3 + j*3;
 			im[pixel + 0] = (uint8_t)(color.r * 255);
 			im[pixel + 1] = (uint8_t)(color.g * 255);
 			im[pixel + 2] = (uint8_t)(color.b * 255);

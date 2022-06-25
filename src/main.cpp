@@ -10,6 +10,7 @@
 #include "scene.h"
 #include "utils/math.h"
 #include "shader.h"
+#include "image.h"
 
 glm::vec3 ray_color(Ray ray, Scene& scene, int depth) {
 	if (depth <= 0) {
@@ -43,7 +44,7 @@ int main(int argc, char** argv) {
 	int w = camera.viewportWidth() * numberOfRays;
 	int h = camera.viewportHeight() * numberOfRays;
 
-	uint8_t* im = new uint8_t[w * h * 3];
+	Image im(w, h);
 
 	Scene scene;
 	scene.setBackgroundColor(
@@ -65,15 +66,15 @@ int main(int argc, char** argv) {
 				color += ray_color(camera.castRay(u, v), scene, 50);
 			}
 			color = normalizeColor(color, 8);
-			uint64_t pixel = (h-i-1)*w*3 + j*3;
-			im[pixel + 0] = (uint8_t)(color.r * 255);
-			im[pixel + 1] = (uint8_t)(color.g * 255);
-			im[pixel + 2] = (uint8_t)(color.b * 255);
+			auto& pixel = im.at(h-i-1, j);
+			pixel.r = (uint8_t)(color.r * 255);
+			pixel.g = (uint8_t)(color.g * 255);
+			pixel.b = (uint8_t)(color.b * 255);
 		}
 	}
 
 	std::string path = "output/" + std::string(argv[1]);
 	FILE* image = std::fopen(path.c_str(), "wb");
 	std::fprintf(image, "P6\n%i %i\n255\n", w, h);
-	std::fwrite(im, sizeof(uint8_t), w*h*3, image);
+	std::fwrite(im.pixels, im.pixelSize, w*h, image);
 }

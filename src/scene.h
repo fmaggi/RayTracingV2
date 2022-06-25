@@ -22,11 +22,11 @@ public:
 		m_hittables.push_back(new T(std::forward<Args>(args)...));
 	}
 
-	glm::vec3 backgroundColor(Ray ray) {
+	glm::vec3 backgroundColor(Ray ray) const {
 		return m_background(ray);
 	}
 
-	std::optional<HitInfo> intersect(Ray ray);
+	std::optional<HitInfo> intersect(Ray ray) const;
 private:
 	std::vector<Hittable*> m_hittables;
 	std::function<glm::vec3 (Ray)> m_background;

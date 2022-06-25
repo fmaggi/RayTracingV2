@@ -9,7 +9,7 @@ Scene::~Scene() {
 	}
 }
 
-std::optional<HitInfo> Scene::intersect(Ray ray) {
+std::optional<HitInfo> Scene::intersect(Ray ray) const {
 	float tMin = 0;
 	float tMax = 10000;
 	std::optional<HitInfo> ret{};

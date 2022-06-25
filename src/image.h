@@ -2,17 +2,7 @@
 
 #include <cstdint>
 
-enum class ImageFormat {
-	None,
-	RGB,
-	RGBA
-};
-
-template<ImageFormat>
-struct Pixel;
-
-template<>
-struct Pixel<ImageFormat::RGB> {
+struct Pixel {
 	union {
 		struct {
 			uint8_t r, g, b;
@@ -21,28 +11,17 @@ struct Pixel<ImageFormat::RGB> {
 	};
 };
 
-template<>
-struct Pixel<ImageFormat::RGBA> {
-	union {
-		struct {
-			uint8_t r, g, b, a;
-		};
-		uint8_t value[4];
-	};
-};
-
-template<ImageFormat format = ImageFormat::RGB>
 struct Image {
 
-	static constexpr uint64_t pixelSize = sizeof(Pixel<format>);
+	static constexpr uint64_t pixelSize = sizeof(Pixel);
 
 	Image(uint32_t w, uint32_t h)
-		: width(w), height(h), pixels(new Pixel<format>[w * h]) {}
+		: width(w), height(h), pixels(new Pixel[w * h]) {}
 
-	Pixel<format>& at(uint32_t i, uint32_t j) {
-		return pixels[i*width + j];
+	Pixel& at(uint32_t x, uint32_t y) {
+		return pixels[x + y*width];
 	}
 
-	uint32_t width, height;
-	Pixel<format>* pixels = nullptr;
+	uint32_t width = 0, height;
+	Pixel* pixels = nullptr;
 };

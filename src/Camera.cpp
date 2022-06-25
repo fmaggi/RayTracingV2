@@ -29,15 +29,15 @@ Camera::Camera(glm::vec3 position, glm::vec3 lookAt, glm::vec3 Vup, float vfov, 
 	m_projectionPlane.lowerLeftCorner = position - hDir/2.0f - vDir/2.0f - w;
 };
 
-Ray Camera::castRay(float u, float v) {
+Ray Camera::castRay(float u, float v) const {
 	return Ray(m_position, m_projectionPlane.lowerLeftCorner + u*m_projectionPlane.horizontalDirection + v*m_projectionPlane.verticalDirection - m_position);
 }
 
-float Camera::viewportWidth() {
+float Camera::viewportWidth() const {
 	return glm::length(m_projectionPlane.horizontalDirection);
 }
 
-float Camera::viewportHeight() {
+float Camera::viewportHeight() const {
 	return glm::length(m_projectionPlane.verticalDirection);
 }
 

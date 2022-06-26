@@ -28,12 +28,13 @@ int main(int argc, char** argv) {
 				return (1-y) * glm::vec3(1) + y * glm::vec3(0.5, 0.7, 1.0);
 			});
 
-	Material* m = scene.addMaterial<Lambertian>("red", glm::vec3(0.8, 0.3, 0.1));
+	Material* redMetal = scene.addMaterial<Metal>("red", glm::vec3(0.8, 0.3, 0.1));
+	Material* diffuse = scene.addMaterial<Lambertian>("d", glm::vec3(0.2, 0.4, 0.96));
 
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, m);
-	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, m);
+	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, redMetal);
+	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, diffuse);
 
-	Renderer renderer(400*a, 400);
+	Renderer renderer(400*a, 400, 100);
 
 	Image im = renderer.render(camera, scene);
 

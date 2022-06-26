@@ -3,15 +3,19 @@
 #include "utils/math.h"
 
 glm::vec3 Renderer::rayColor(Ray ray, const Scene& scene, uint32_t depth) const {
+	float tMin = 0.000001;
+	float tMax = Math::infinity;
 	if (depth <= 0) {
 		return glm::vec3(0);
 	}
 
-  auto info = scene.intersect(ray);
+  auto info = scene.intersect(ray, tMin, tMax);
   if (info){
-		glm::vec3 dir = info->n + Math::randomInUnitSphere();
-		Ray reflection(info->p, dir);
-		return 0.5f * rayColor(reflection, scene, depth--);
+		auto scatter = info->material->scatter(info->p, info->n);
+		if (scatter) {
+			return info->material->lightValue() * rayColor(*scatter, scene, --depth);
+		}
+		return glm::vec3(0);
   }
 	return scene.backgroundColor(ray);
 }
@@ -43,7 +47,7 @@ Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Scene& scen
 	return pixel;
 }
 
-Image Renderer::render(const Camera &camera, const Scene &scene) {
+Image Renderer::render(const Camera &camera, const Scene &scene) const {
 	Image image(imageWidth, imageHeight);
 
 	invWidth = 1.0f / imageWidth;

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Camera.h"
+#include "material.h"
 #include "scene.h"
 #include "renderer.h"
 
@@ -27,8 +28,10 @@ int main(int argc, char** argv) {
 				return (1-y) * glm::vec3(1) + y * glm::vec3(0.5, 0.7, 1.0);
 			});
 
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f);
-	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100);
+	Material* m = scene.addMaterial<Lambertian>("red", glm::vec3(0.8, 0.3, 0.1));
+
+	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, m);
+	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, m);
 
 	Renderer renderer(400*a, 400);
 

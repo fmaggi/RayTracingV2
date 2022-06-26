@@ -9,6 +9,7 @@ namespace Math {
 
 static constexpr float infinity = std::numeric_limits<float>::infinity();
 static constexpr float pi = 3.1415926535897932385;
+static constexpr float almostZero = 1e-8f;
 
 namespace internal {
 	inline float random() {
@@ -50,6 +51,10 @@ inline glm::vec3 randomInUnitSphere() {
 		}
 		return v;
 	}
+}
+
+inline bool nearZero(glm::vec3 v) {
+	return v.x < almostZero && v.y < almostZero && v.z < almostZero;
 }
 
 }

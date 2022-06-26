@@ -9,7 +9,7 @@ public:
 	Renderer() {}
 	Renderer(uint32_t width, uint32_t height, uint32_t samples=8, uint32_t reflections=50)
 		: samples(samples), imageWidth(width), imageHeight(height), reflections(reflections) {}
-	Image render(const Camera& camera, const Scene& scene);
+	Image render(const Camera& camera, const Scene& scene) const;
 
 	uint32_t samples = 0;
 	uint32_t imageWidth = 0, imageHeight = 0;
@@ -20,7 +20,7 @@ private:
 
 	glm::vec3 gammaCorrectColor(glm::vec3 color) const;
 
-	float invWidth = 0;
-	float invHeight = 0;
-	float invSamples = 0;
+	mutable float invWidth = 0;
+	mutable float invHeight = 0;
+	mutable float invSamples = 0;
 };

@@ -29,8 +29,8 @@ Camera::Camera(glm::vec3 position, glm::vec3 lookAt, glm::vec3 Vup, float vfov, 
 	m_projectionPlane.lowerLeftCorner = position - hDir/2.0f - vDir/2.0f - w;
 };
 
-Ray Camera::castRay(float u, float v) const {
-	return Ray(m_position, m_projectionPlane.lowerLeftCorner + u*m_projectionPlane.horizontalDirection + v*m_projectionPlane.verticalDirection - m_position);
+Ray Camera::castRay(glm::vec2 uv) const {
+	return Ray(m_position, m_projectionPlane.lowerLeftCorner + uv.x*m_projectionPlane.horizontalDirection + uv.y*m_projectionPlane.verticalDirection - m_position);
 }
 
 float Camera::viewportWidth() const {

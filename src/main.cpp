@@ -30,7 +30,9 @@ int main(int argc, char** argv) {
 	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f);
 	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100);
 
-	Image im = Renderer::render(camera, scene);
+	Renderer renderer(400*a, 400);
+
+	Image im = renderer.render(camera, scene);
 
 	std::string path = "output/" + std::string(argv[1]);
 	FILE* image = std::fopen(path.c_str(), "wb");

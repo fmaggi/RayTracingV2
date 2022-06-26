@@ -6,7 +6,7 @@ class Camera {
 public:
 	Camera(glm::vec3 position, glm::vec3 lookAt, glm::vec3 Vup, float vfov, float aspectRatio);
 
-	Ray castRay(float u, float v) const;
+	Ray castRay(glm::vec2 uv) const;
 
 	float viewportWidth() const;
 	float viewportHeight() const;

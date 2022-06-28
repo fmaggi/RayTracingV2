@@ -5,13 +5,6 @@
 
 #include <optional>
 
-struct HitInfo {
-	glm::vec3 p;
-	glm::vec3 n;
-	float t;
-	Material* material;
-};
-
 class Hittable {
 public:
 	virtual ~Hittable() {}

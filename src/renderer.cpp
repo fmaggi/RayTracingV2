@@ -9,11 +9,11 @@ glm::vec3 Renderer::rayColor(Ray ray, const Scene& scene, uint32_t depth) const 
 		return glm::vec3(0);
 	}
 
-  auto info = scene.intersect(ray, tMin, tMax);
-  if (info){
-		auto scatter = info->material->scatter(ray, info->p, info->n);
+  auto hit = scene.intersect(ray, tMin, tMax);
+  if (hit){
+		auto scatter = hit->material->scatter(ray, *hit);
 		if (scatter) {
-			return info->material->attenuation() * rayColor(*scatter, scene, --depth);
+			return hit->material->attenuation() * rayColor(*scatter, scene, --depth);
 		}
 		return glm::vec3(0);
   }

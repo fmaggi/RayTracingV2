@@ -22,7 +22,7 @@ std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const 
 	HitInfo info;
 	info.t = t;
 	info.p = ray.at(t);
-	info.n = normalDirection(ray, (info.p - m_position) / m_radius);
+	info.setNormal(ray.direction, (info.p - m_position) / m_radius);
 	info.material = m_material;
 	return info;
 }

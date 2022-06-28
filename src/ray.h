@@ -1,10 +1,11 @@
 #pragma once
 
+#include "glm/geometric.hpp"
 #include "glm/glm.hpp"
 
 struct Ray {
 	Ray(glm::vec3 origin, glm::vec3 direction)
-		: origin(origin), direction(direction) {}
+		: origin(origin), direction(glm::normalize(direction)) {}
 
 
 	glm::vec3 at(float t) {
@@ -14,8 +15,3 @@ struct Ray {
 	const glm::vec3 origin;
 	const glm::vec3 direction;
 };
-
-inline glm::vec3 normalDirection(Ray ray, glm::vec3 outwardNormal) {
-	bool frontFace = glm::dot(ray.direction, outwardNormal) < 0;
-	return frontFace ? outwardNormal : -outwardNormal;
-}

@@ -29,10 +29,12 @@ int main(int argc, char** argv) {
 	Material* metal = scene.addMaterial<Metal>("m", glm::vec3(0.8, 0.8, 0.8), 0.3);
 	Material* metal2 = scene.addMaterial<Metal>("m2", glm::vec3(0.8, 0.6, 0.2), 1.0f);
 
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, diffuse);
+	scene.add<Sphere>(glm::vec3(0, 0, -3), 0.5f, diffuse);
   scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, redMetal);
-	scene.add<Sphere>(glm::vec3(1, 0, -1), 0.5f, metal);
-	scene.add<Sphere>(glm::vec3(-1, 0, -1), 0.5f, metal2);
+	scene.add<Sphere>(glm::vec3(5, 0, -5), 0.5f, metal);
+	scene.add<Sphere>(glm::vec3(-7, 0, -8), 0.5f, metal2);
+	scene.add<Sphere>(glm::vec3(-10, 5, -8), 0.5f, metal2);
+	scene.add<Sphere>(glm::vec3(6, 3, -12), 0.5f, metal2);
 
 	Renderer renderer(400*a, 400, 50);
 

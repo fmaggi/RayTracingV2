@@ -2,7 +2,8 @@
 
 #include <algorithm>
 
-auto maxExtent(glm::vec3 v) {
+auto maxExtent(AABB a) {
+	glm::vec3 v = a.max - a.min;
 	if (v.x > v.y && v.x > v.z) {
 		return &glm::vec3::x;
 	}
@@ -26,13 +27,11 @@ int BVHtree::recursiveBuild(std::vector<HittableInfo>& info, uint32_t start, uin
 	}
 
 	AABB boundingBox;
-
 	for(uint32_t i = start; i < end; ++i) {
 		boundingBox = AABB::Union(boundingBox, info[i].aabb);
 	}
 
-	glm::vec3 centroid = (boundingBox.max + boundingBox.min) * 0.5f;
-	auto dir = maxExtent(centroid);
+	auto dir = maxExtent(boundingBox);
 
 	auto startIt = info.begin() + start;
 	auto endIt = info.begin() + end;
@@ -41,8 +40,8 @@ int BVHtree::recursiveBuild(std::vector<HittableInfo>& info, uint32_t start, uin
 			});
 
 	uint32_t mid = (end + start) / 2;
-	node.right = recursiveBuild(info, start, mid, hittables);
-	node.left = recursiveBuild(info, mid, end, hittables);
+	node.left = recursiveBuild(info, start, mid, hittables);
+	node.right = recursiveBuild(info, mid, end, hittables);
 	node.hittable = nullptr;
 	node.aabb = boundingBox;
 

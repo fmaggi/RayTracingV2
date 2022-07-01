@@ -15,7 +15,7 @@ Scene::~Scene() {
 	}
 }
 
-std::optional<HitInfo> Scene::intersect(Ray ray, float tMin, float tMax) const {
+std::optional<HitInfo> Scene::traverse(Ray ray, float tMin, float tMax) const {
 	std::optional<HitInfo> ret{};
 	bool hit = false;
 	for (const auto& hittable : hittables) {

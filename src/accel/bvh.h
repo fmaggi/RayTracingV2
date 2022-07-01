@@ -11,12 +11,12 @@ struct BVHnode {
 	int right;
 };
 
-class BVHtree {
+class BVHtree : public Aggregate {
 public:
 	BVHtree() {}
 	BVHtree(const std::vector<Hittable*>& hittables);
 
-	std::optional<HitInfo> traverse(Ray ray, float tMin, float tMax) const;
+	std::optional<HitInfo> traverse(Ray ray, float tMin, float tMax) const override;
 private:
 	struct HittableInfo {
 		HittableInfo() {}

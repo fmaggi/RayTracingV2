@@ -18,6 +18,10 @@ struct Image {
 	Image(uint32_t w, uint32_t h)
 		: width(w), height(h), pixels(new Pixel[w * h]) {}
 
+	~Image() {
+		delete[] pixels;
+	}
+
 	Pixel& at(uint32_t x, uint32_t y) {
 		return pixels[x + y*width];
 	}

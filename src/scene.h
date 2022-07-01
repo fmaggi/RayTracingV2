@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hittable.h"
 #include "object.h"
 
 #include <vector>
@@ -14,7 +15,7 @@ concept HittableBaseClass = std::derived_from<T, Hittable>;
 template<typename T>
 concept MaterialBaseClass = std::derived_from<T, Material>;
 
-class Scene {
+class Scene : public Aggregate {
 public:
 	Scene();
 	~Scene();
@@ -41,7 +42,7 @@ public:
 		return it->second;
 	}
 
-	std::optional<HitInfo> intersect(Ray ray, float tMin, float tMax) const;
+	std::optional<HitInfo> traverse(Ray ray, float tMin, float tMax) const override;
 
 	const std::vector<Hittable*>& getHittables() const { return hittables; }
 

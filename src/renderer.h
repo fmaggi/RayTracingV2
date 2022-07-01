@@ -3,6 +3,7 @@
 #include "image.h"
 #include "Camera.h"
 #include "scene.h"
+#include "accel/bvh.h"
 
 class Renderer {
 public:

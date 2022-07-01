@@ -1,7 +1,6 @@
 #pragma once
 
 #include "object.h"
-#include "accel/bvh.h"
 
 #include <vector>
 #include <unordered_map>

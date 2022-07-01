@@ -61,7 +61,6 @@ BVHtree::BVHtree(const std::vector<Hittable*>& hittables) {
 }
 
 std::optional<HitInfo> BVHtree::traverse(Ray ray, float tMin, float tMax) const {
-
 	int currentIndex = rootIndex;
 	int visitOffset = 0;
 	int nodesToVisit[64];
@@ -70,14 +69,14 @@ std::optional<HitInfo> BVHtree::traverse(Ray ray, float tMin, float tMax) const 
 
 	while (true) {
 		const BVHnode* node = nodes.data() + currentIndex;
-		if (node->hittable) {
-			auto hit = node->hittable->intersect(ray, tMin, tMax);
-			if (hit) {
-				hitInfo = hit;
-				tMax = hit->t;
-			}
-		} else {
-			if (node->aabb.intersect(ray, tMin, tMax)) {
+		if (node->aabb.intersect(ray, tMin, tMax)) {
+			if (node->hittable) {
+				auto hit = node->hittable->intersect(ray, tMin, tMax);
+				if (hit) {
+					hitInfo = hit;
+					tMax = hit->t;
+				}
+			} else {
 				nodesToVisit[visitOffset++] = node->left;
 				currentIndex = node->right;
 				continue;
@@ -93,18 +92,18 @@ std::optional<HitInfo> BVHtree::traverse(Ray ray, float tMin, float tMax) const 
 	return hitInfo;
 }
 
-static void rdump(BVHnode node, const std::vector<BVHnode>& nodes) {
+static void rdump(BVHnode node, const std::vector<BVHnode>& nodes, int offset) {
 	if (node.hittable) {
-		std::printf("%p\n", node.hittable);
+		std::printf("%*s %p\n", offset, "", node.hittable);
 		return;
 	}
-	std::printf("left\n");
-	rdump(nodes[node.left], nodes);
-	std::printf("right\n");
-	rdump(nodes[node.right], nodes);
+	std::printf("%*s left:\n", offset, "");
+	rdump(nodes[node.left], nodes, offset+1);
+	std::printf("%*s right\n", offset, "");
+	rdump(nodes[node.right], nodes, offset+1);
 }
 
 void BVHtree::dump() {
 	std::printf("-------Tree dump-------\n");
-	rdump(nodes[rootIndex], nodes);
+	rdump(nodes[rootIndex], nodes, 0);
 }

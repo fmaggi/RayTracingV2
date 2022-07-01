@@ -2,22 +2,20 @@
 
 #include "utils/math.h"
 
-glm::vec3 Renderer::rayColor(Ray ray, const Scene& scene, uint32_t depth) const {
+glm::vec3 Renderer::rayColor(Ray ray, const BVHtree& tree, uint32_t depth) const {
 	float tMin = 0.000001;
 	float tMax = Math::infinity;
 	if (depth <= 0) {
 		return glm::vec3(0);
 	}
 
-  auto hit = scene.intersect(ray, tMin, tMax);
-  if (hit){
-		auto scatter = hit->material->scatter(ray, *hit);
-		if (scatter) {
-			return hit->material->attenuation() * rayColor(*scatter, scene, --depth);
-		}
-		return glm::vec3(0);
-  }
-	return scene.backgroundColor(ray);
+	auto hit = tree.traverse(ray, tMin, tMax);
+	if (hit){
+		Ray scatter = hit->material->scatter(ray, *hit);
+		glm::vec3 attenuation = hit->material->attenuation();
+		return attenuation * rayColor(scatter, tree, --depth);
+	}
+	return background(ray);
 }
 
 glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
@@ -32,13 +30,13 @@ glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
 	return glm::vec3{r, g, b};
 }
 
-Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Scene& scene) const {
+Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const BVHtree& tree) const {
 	glm::vec3 color{};
 	for (uint32_t s = 0; s < samples; s++) {
 		glm::vec2 suv;
 		suv.x = (uv.x + Math::random<float>()) * invWidth;
 		suv.y = (uv.y + Math::random<float>()) * invHeight;
-		color += rayColor(camera.castRay(suv), scene, reflections);
+		color += rayColor(camera.castRay(suv), tree, reflections);
 	}
 	color = gammaCorrectColor(color);
 	Pixel pixel;
@@ -54,11 +52,14 @@ Image Renderer::render(const Camera &camera, const Scene &scene) const {
 	invWidth = 1.0f / imageWidth;
 	invHeight = 1.0f / imageHeight;
 	invSamples = 1.0f / samples;
+	background = scene.background;
+
+	BVHtree tree(scene.getHittables());
 
 	for (uint32_t y = 0; y < imageHeight; y++) {
 		for (uint32_t x = 0; x < imageWidth; x++) {
 			glm::vec2 uv = { x, y };
-			image.at(x, imageHeight-y-1) = shadePixel(uv, camera, scene);
+			image.at(x, imageHeight-y-1) = shadePixel(uv, camera, tree);
 		}
 	}
 

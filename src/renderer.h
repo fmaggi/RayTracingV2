@@ -15,12 +15,13 @@ public:
 	uint32_t imageWidth = 0, imageHeight = 0;
 	uint32_t reflections = 0;
 private:
-	glm::vec3 rayColor(Ray ray, const Scene& scene, uint32_t depth) const;
-	Pixel shadePixel(glm::vec2 uv, const Camera& camera, const Scene& scene) const;
+	glm::vec3 rayColor(Ray ray, const BVHtree& scene, uint32_t depth) const;
+	Pixel shadePixel(glm::vec2 uv, const Camera& camera, const BVHtree& scene) const;
 
 	glm::vec3 gammaCorrectColor(glm::vec3 color) const;
 
 	mutable float invWidth = 0;
 	mutable float invHeight = 0;
 	mutable float invSamples = 0;
+	mutable std::function<glm::vec3 (Ray)> background;
 };

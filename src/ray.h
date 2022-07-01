@@ -5,7 +5,7 @@
 
 struct Ray {
 	Ray(glm::vec3 origin, glm::vec3 direction)
-		: origin(origin), direction(glm::normalize(direction)) {}
+		: origin(origin), direction(direction) {}
 
 
 	glm::vec3 at(float t) {

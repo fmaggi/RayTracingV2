@@ -3,14 +3,14 @@
 #include "utils/math.h"
 
 Scene::Scene() {
-	m_background = [](Ray ray) { return glm::vec3(0.3); };
+	background = [](Ray ray) { return glm::vec3(0.3); };
 }
 
 Scene::~Scene() {
-	for (const auto& hittable : m_hittables) {
+	for (const auto& hittable : hittables) {
 		delete hittable;
 	}
-	for (const auto& it : m_materials) {
+	for (const auto& it : materials) {
 		delete it.second;
 	}
 }
@@ -18,7 +18,7 @@ Scene::~Scene() {
 std::optional<HitInfo> Scene::intersect(Ray ray, float tMin, float tMax) const {
 	std::optional<HitInfo> ret{};
 	bool hit = false;
-	for (const auto& hittable : m_hittables) {
+	for (const auto& hittable : hittables) {
 		auto info = hittable->intersect(ray, tMin, tMax);
 		if (info) {
 			tMax = info->t;

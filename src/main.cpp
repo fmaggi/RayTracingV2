@@ -3,9 +3,6 @@
 #include <cstdlib>
 #include <string>
 
-#include "Camera.h"
-#include "material.h"
-#include "scene.h"
 #include "renderer.h"
 
 int main(int argc, char** argv) {
@@ -21,20 +18,21 @@ int main(int argc, char** argv) {
 	Camera camera(glm::vec3(0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0), 70, a);
 
 	Scene scene;
-	scene.setBackgroundColor(
-			[](Ray r) {
+	scene.background = [](Ray r) {
 				glm::vec3 u_dir = glm::normalize(r.direction);
 				float y = 0.5*u_dir.y + 1;
 				return (1-y) * glm::vec3(1) + y * glm::vec3(0.5, 0.7, 1.0);
-			});
+		};
 
-	Material* redMetal = scene.addMaterial<Dielectric>("red", 2.3);
-	Material* diffuse = scene.addMaterial<Lambertian>("d", glm::vec3(0.2, 0.4, 0.96));
-	Material* metal = scene.addMaterial<Metal>("m", glm::vec3(0.4, 0.8, 0.2));
+	Material* redMetal = scene.addMaterial<Lambertian>("red", glm::vec3(0.8, 0.8, 0.0));
+	Material* diffuse = scene.addMaterial<Lambertian>("d", glm::vec3(0.7, 0.3, 0.3));
+	Material* metal = scene.addMaterial<Metal>("m", glm::vec3(0.8, 0.8, 0.8), 0.3);
+	Material* metal2 = scene.addMaterial<Metal>("m2", glm::vec3(0.8, 0.6, 0.2), 1.0f);
 
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, redMetal);
-	scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, diffuse);
+	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, diffuse);
+  scene.add<Sphere>(glm::vec3(0,-100.5,-1), 100, redMetal);
 	scene.add<Sphere>(glm::vec3(1, 0, -1), 0.5f, metal);
+	scene.add<Sphere>(glm::vec3(-1, 0, -1), 0.5f, metal2);
 
 	Renderer renderer(400*a, 400, 50);
 

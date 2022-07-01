@@ -1,6 +1,8 @@
 #pragma once
 
 #include "object.h"
+#include "accel/bvh.h"
+
 #include <vector>
 #include <unordered_map>
 #include <concepts>
@@ -18,37 +20,34 @@ public:
 	Scene();
 	~Scene();
 
-	void setBackgroundColor(std::function<glm::vec3(Ray)> func) {
-		m_background = func;
-	}
-
 	template<HittableBaseClass T, typename... Args>
-	void add(Args&&... args) {
-		m_hittables.push_back(new T(std::forward<Args>(args)...));
+	Hittable* add(Args&&... args) {
+		Hittable* h = new T(std::forward<Args>(args)...);
+		hittables.push_back(h);
+		return h;
 	}
 
 	template<MaterialBaseClass T, typename... Args>
 	Material* addMaterial(std::string name, Args&&... args) {
 		Material* m = new T(std::forward<Args>(args)...);
-		m_materials[name] = m;
+		materials[name] = m;
 		return m;
 	}
 
 	Material* getMaterial(std::string name) {
-		auto it = m_materials.find(name);
-		if (it == m_materials.end()) {
+		auto it = materials.find(name);
+		if (it == materials.end()) {
 			return nullptr;
 		}
 		return it->second;
 	}
 
-	glm::vec3 backgroundColor(Ray ray) const {
-		return m_background(ray);
-	}
-
 	std::optional<HitInfo> intersect(Ray ray, float tMin, float tMax) const;
+
+	const std::vector<Hittable*>& getHittables() const { return hittables; }
+
+	std::function<glm::vec3 (Ray)> background;
 private:
-	std::vector<Hittable*> m_hittables;
-	std::unordered_map<std::string, Material*> m_materials;
-	std::function<glm::vec3 (Ray)> m_background;
+	std::vector<Hittable*> hittables;
+	std::unordered_map<std::string, Material*> materials;
 };

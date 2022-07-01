@@ -24,26 +24,28 @@ static float shlickApprox(float cosI, float ir) {
 	return r0 + (1-r0)*pow((1-cosI), 5);
 }
 
-std::optional<Ray> Lambertian::scatter(Ray ray, HitInfo hit) const {
+Ray Lambertian::scatter(Ray ray, HitInfo hit) const {
 	glm::vec3 dir = hit.n + Math::randomInUnitSphere();
 	dir = Math::nearZero(dir) ? hit.n : dir;
 	return Ray(hit.p, dir);
 }
 
-std::optional<Ray> Metal::scatter(Ray ray, HitInfo hit) const {
+Ray Metal::scatter(Ray ray, HitInfo hit) const {
 	glm::vec3 dir = reflect(glm::normalize(ray.direction), hit.n) + fuzz * Math::randomInUnitSphere();
 	return Ray(hit.p, dir);
 }
 
-std::optional<Ray> Dielectric::scatter(Ray ray, HitInfo hit) const {
+Ray Dielectric::scatter(Ray ray, HitInfo hit) const {
 	const float refraction = hit.frontFace ? (1.0f/ir) : ir;
-	const float cosI = fmin(glm::dot(-ray.direction, hit.n), 1.0f);
+
+	const glm::vec3 normDir = glm::normalize(ray.direction);
+	const float cosI = fmin(glm::dot(-normDir, hit.n), 1.0f);
 	const float sinI = sqrt(1 - cosI*cosI);
 	glm::vec3 dir;
 	if (refraction * sinI > 1.0f || shlickApprox(cosI, refraction) > Math::random<float>()) {
-		dir = reflect(ray.direction, hit.n);
+		dir = reflect(normDir, hit.n);
 	} else {
-		dir = refract(ray.direction, hit.n, refraction);
+		dir = refract(normDir, hit.n, refraction);
 	}
 	return Ray(hit.p, dir);
 }

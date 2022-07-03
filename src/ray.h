@@ -12,6 +12,10 @@ struct Ray {
 		return origin + t * direction;
 	}
 
+	float tAt(glm::vec3 p) {
+		return (p.x - origin.x) / direction.x;
+	}
+
 	const glm::vec3 origin;
 	const glm::vec3 direction;
 };

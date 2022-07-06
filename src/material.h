@@ -19,23 +19,19 @@ struct HitInfo {
 
 class Material {
 public:
-	enum class MaterialType {
-		Diffuse, Reflective, Refractive
-	};
 
-	Material(glm::vec3 albedo, MaterialType t)
-		: albedo(albedo), type(t) {}
+	Material(glm::vec3 albedo)
+		: albedo(albedo) {}
 	virtual ~Material() {}
 	virtual Ray scatter(Ray ray, HitInfo hit) const = 0;
 	virtual glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const = 0;
 	const glm::vec3 albedo;
-	const MaterialType type;
 };
 
 class Lambertian : public Material {
 public:
 	Lambertian(glm::vec3 color)
-		: Material(color, MaterialType::Diffuse) {}
+		: Material(color) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
 	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return albedo; }
@@ -44,7 +40,7 @@ public:
 class Metal : public Material {
 public:
 	Metal(glm::vec3 color, float fuzz=0)
-		: Material(color, MaterialType::Reflective), fuzz(fuzz > 1 ? 1 : fuzz) {}
+		: Material(color), fuzz(fuzz > 1 ? 1 : fuzz) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
 	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return glm::vec3(0.0f); }
@@ -54,7 +50,7 @@ public:
 class Dielectric : public Material {
 public:
 	Dielectric(glm::vec3 albedo, float refraction)
-		: Material(albedo, MaterialType::Refractive), ir(refraction) {}
+		: Material(albedo), ir(refraction) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
 	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return glm::vec3(0.0f); }

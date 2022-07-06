@@ -75,16 +75,11 @@ int main(int argc, char** argv) {
 	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, center);
 	scene.add<Sphere>(glm::vec3(1, 0, -1), 0.5f, right);
 	scene.add<Sphere>(glm::vec3(-1, 0, -1), 0.5f, left);
-	scene.add<Sphere>(glm::vec3(-1, 0, -1), -0.4f, left);
-	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(1, 0, 2));
+	// scene.add<Sphere>(glm::vec3(-1, 0, -1), -0.4f, left);
+	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(1, 0, -2));
 
-	scene.background = [](Ray r) {
-				glm::vec3 u_dir = glm::normalize(r.direction);
-				float y = 0.5*u_dir.y + 1;
-				return (1-y) * glm::vec3(1) + y * glm::vec3(0.5, 0.7, 1.0);
-		};
 
-	Renderer renderer(400*a, 400, 100);
+	Renderer renderer(400*a, 400, 8);
 
 	Image im = renderer.render(camera, scene);
 

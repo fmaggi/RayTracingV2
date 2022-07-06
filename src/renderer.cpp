@@ -6,22 +6,12 @@
 #include "utils/math.h"
 #include "light.h"
 
-// need to fix this
 static bool visible(const Aggregate* agg, Ray lightRay, glm::vec3 point) {
 	float tMax = lightRay.tAt(point);
 	auto hit = agg->traverse(lightRay, 0.000001, tMax);
 	if (!hit) {
 		return true;
 	}
-
-//	if (hit->material->type == Material::MaterialType::Refractive) {
-//		Ray bounced(hit->p, point - hit->p);
-//		return visible(agg, bounced, point);
-//	}
-
-//	if (hit->material->type == Material::MaterialType::Reflective) {
-//		return glm::dot(hit->n, point - hit->p) > 0;
-//	}
 
 	return false;
 }

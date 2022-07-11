@@ -6,16 +6,6 @@
 #include "utils/math.h"
 #include "light.h"
 
-static bool visible(const Aggregate* agg, Ray lightRay, glm::vec3 point) {
-	float tMax = lightRay.tAt(point);
-	auto hit = agg->traverse(lightRay, 0.000001, tMax);
-	if (!hit) {
-		return true;
-	}
-
-	return false;
-}
-
 glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Light*>& lights, uint32_t depth) const {
 	float tMin = 0.000001;
 	float tMax = Math::infinity;
@@ -29,7 +19,8 @@ glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Li
 	for (const auto& light : lights) {
 		VisibilityTester tester = light->visibilityTester(hit->p);
 		Ray lightRay(hit->p, -tester.lightDir);
-		float v = visible(agg, lightRay, tester.p);
+		float lightMax = lightRay.tAt(tester.p);
+		float v = !agg->traverse(lightRay, tMin, lightMax);
 		lightColor += v * light->lightColor(hit->p, hit->n) * hit->material->attenuation(-ray.direction, -tester.lightDir);
 	}
 
@@ -86,7 +77,7 @@ Image Renderer::render(const Camera &camera, const Scene &scene) {
 
 	BVHtree tree(scene.getHittables());
 
-	// auto start = high_resolution_clock::now();
+	 auto start = high_resolution_clock::now();
 
 	for (uint32_t y = 0; y < imageHeight; y++) {
 		std::fprintf(stderr, "\rLine: %u", y);
@@ -97,11 +88,11 @@ Image Renderer::render(const Camera &camera, const Scene &scene) {
 	}
 	std::printf("\n");
 
-	// auto stop = high_resolution_clock::now();
+	 auto stop = high_resolution_clock::now();
 
-	// auto ms_int = duration_cast<seconds>(stop-start);
+	 auto ms_int = duration_cast<seconds>(stop-start);
 
-	// std::printf("%li\n", ms_int.count());
+	 std::printf("%li\n", ms_int.count());
 
 	return image;
 }

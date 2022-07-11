@@ -19,7 +19,6 @@ std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const 
 
 	float t = -half_b_over_a - sd;
 	if (t < tMin || t > tMax) {
-//		return {};
 		t = -half_b_over_a + sd;
 		if (t < tMin || t > tMax) {
 			return {};
@@ -27,11 +26,9 @@ std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const 
 		 //this gives a weird artiffact that I cannot yet fix
 	}
 
-	HitInfo info;
-	info.t = t;
-	info.p = ray.at(t);
-	info.setNormal(ray.direction, (info.p - m_position) / m_radius);
-	info.material = m_material;
+	glm::vec3 p = ray.at(t);
+	glm::vec3 n = (p - m_position) / m_radius;
+	HitInfo info(p, t, n, ray.direction, m_material);
 	return info;
 }
 

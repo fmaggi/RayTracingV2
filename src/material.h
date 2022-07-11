@@ -1,21 +1,10 @@
 #pragma once
 
+#include "hit.h"
 #include "ray.h"
 
-class Material;
-
-struct HitInfo {
-	glm::vec3 p;
-	glm::vec3 n;
-	Material* material;
-	float t;
-	bool frontFace;
-
-	void setNormal(glm::vec3 hitDir, glm::vec3 normal) {
-		frontFace = glm::dot(hitDir, normal) < 0;
-		n = frontFace ? normal : -normal;
-	}
-};
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 class Material {
 public:
@@ -56,3 +45,5 @@ public:
 	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return glm::vec3(0.0f); }
 	const float ir = 0;
 };
+
+#pragma GCC diagnostic pop

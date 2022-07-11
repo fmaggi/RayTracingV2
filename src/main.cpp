@@ -70,16 +70,18 @@ int main(int argc, char** argv) {
 	Material* left = scene.addMaterial<Dielectric>("l", glm::vec3(1.0f), 1.5f);
 	Material* ground = scene.addMaterial<Lambertian>("g", glm::vec3(0.8, 0.8, 0.0));
 	Material* center = scene.addMaterial<Lambertian>("c", glm::vec3(0.1, 0.2, 0.5));
-	Material* right = scene.addMaterial<Metal>("r", glm::vec3(0.8, 0.6, 0.2), 0.3);
+	Material* right = scene.addMaterial<Metal>("r", glm::vec3(0.8, 0.6, 0.2));
 	scene.add<Sphere>(glm::vec3(0, -100.5f, -1), 100, ground);
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, center);
+	scene.add<Sphere>(glm::vec3(0, 3, -1), 0.5f, center);
 	scene.add<Sphere>(glm::vec3(1, 0, -1), 0.5f, right);
-	scene.add<Sphere>(glm::vec3(-1, 0, -1), 0.5f, left);
+	scene.add<Sphere>(glm::vec3(-0, 0.3, -1), 0.5f, left);
 	// scene.add<Sphere>(glm::vec3(-1, 0, -1), -0.4f, left);
-	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(1, 0, -2));
+	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(1, 0, 2));
+	scene.background = [](Ray r) {
+			return glm::vec3(0.05f);
+		};
 
-
-	Renderer renderer(400*a, 400, 8);
+	Renderer renderer(400*a, 400, 50);
 
 	Image im = renderer.render(camera, scene);
 

@@ -27,25 +27,25 @@ std::vector<BDPT::Vertex> BDPT::generateCameraSubpath(const Aggregate* agg, Ray 
 		vertices.push_back(v0);
 	}
 
-	float tMin = 0.000001;
-	float tMax = Math::infinity;
+	// float tMin = 0.000001;
+	// float tMax = Math::infinity;
 
-	Ray r = startingRay;
-	glm::vec3 color(1.0f);
-	for (uint32_t i = 0; i < depth; ++i) {
-		auto hit = agg->traverse(r, tMin, tMax);
-		if (!hit) {
-			break;
-		}
+	// Ray r = startingRay;
+	// glm::vec3 color(1.0f);
+	// for (uint32_t i = 0; i < depth; ++i) {
+	// 	auto hit = agg->traverse(r, tMin, tMax);
+	// 	if (!hit) {
+	// 		break;
+	// 	}
 
-		r = hit->material->scatter(r, *hit);
-		color *= hit->material->albedo;
+	// 	r = hit->material->scatter(r, *hit);
+	// 	color *= hit->material->albedo;
 
-		Vertex v;
-		v.albedo = color;
-		v.type = VertexType::Surface;
-		vertices.push_back(v);
-	}
+	// 	Vertex v;
+	// 	v.albedo = color;
+	// 	v.type = VertexType::Surface;
+	// 	vertices.push_back(v);
+	// }
 
 	return vertices;
 }
@@ -54,30 +54,29 @@ std::vector<BDPT::Vertex> BDPT::generateLightSubpath(const Aggregate* agg, const
 	std::vector<Vertex> vertices;
 	{
 		Vertex v0;
-		v0.albedo = light->color;
 		v0.type = VertexType::Light;
 		vertices.push_back(v0);
 	}
 
-	float tMin = 0.000001;
-	float tMax = Math::infinity;
+	//float tMin = 0.000001;
+	//float tMax = Math::infinity;
 
-	Ray r(light->position(), Math::random<glm::vec3>()); // Need to fix random direction
-	glm::vec3 color = light->color;
-	for (uint32_t i = 0; i < depth; ++i) {
-		auto hit = agg->traverse(r, tMin, tMax);
-		if (!hit) {
-			break;
-		}
+	//Ray r(light->position(), Math::random<glm::vec3>()); // Need to fix random direction
+	//glm::vec3 color = light->color;
+	//for (uint32_t i = 0; i < depth; ++i) {
+	//	auto hit = agg->traverse(r, tMin, tMax);
+	//	if (!hit) {
+	//		break;
+	//	}
 
-		Vertex v;
-		v.albedo = color;
-		v.type = VertexType::Surface;
-		vertices.push_back(v);
+	//	Vertex v;
+	//	v.albedo = color;
+	//	v.type = VertexType::Surface;
+	//	vertices.push_back(v);
 
-		r = hit->material->scatter(r, *hit);
-		color *= hit->material->albedo;
-	}
+	//	r = hit->material->scatter(r, *hit);
+	//	color *= hit->material->albedo;
+	//}
 
 	return vertices;
 }

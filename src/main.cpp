@@ -81,7 +81,8 @@ int main(int argc, char** argv) {
 			return glm::vec3(0.05f);
 		};
 
-	Renderer renderer(400*a, 400, 50);
+	Renderer renderer(400*a, 400);
+	renderer.samples = 8;
 
 	Image im = renderer.render(camera, scene);
 

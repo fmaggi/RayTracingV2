@@ -15,18 +15,20 @@ public:
 	virtual ~Light() {}
 	virtual glm::vec3 lightColor(glm::vec3 hitPoint, glm::vec3 hitNormal) const = 0;
 	virtual VisibilityTester visibilityTester(glm::vec3 hitPoint) const = 0;
-protected:
+	virtual glm::vec3 position() const = 0;
 	glm::vec3 color;
+protected:
 	float intensity;
 };
 
 class PointLight : public Light {
 public:
 	PointLight(glm::vec3 color, float intensity, glm::vec3 position)
-		: Light(color, intensity), position(position) {}
+		: Light(color, intensity), pos(position) {}
 
 	glm::vec3 lightColor(glm::vec3 hitPoint, glm::vec3 hitNormal) const override;
 	VisibilityTester visibilityTester(glm::vec3 hitPoint) const override;
+	glm::vec3 position() const override { return pos; }
 private:
-	glm::vec3 position;
+	glm::vec3 pos;
 };

@@ -3,6 +3,7 @@
 
 #include "material.h"
 #include "renderer.h"
+#include "bdpt.h"
 #include "utils/math.h"
 
 static Scene randomScene() {
@@ -72,16 +73,17 @@ int main(int argc, char** argv) {
 	Material* center = scene.addMaterial<Lambertian>("c", glm::vec3(0.1, 0.2, 0.5));
 	Material* right = scene.addMaterial<Metal>("r", glm::vec3(0.8, 0.6, 0.2));
 	scene.add<Sphere>(glm::vec3(0, -100.5f, -1), 100, ground);
-	scene.add<Sphere>(glm::vec3(0, 0, -1), 0.5f, center);
-	scene.add<Sphere>(glm::vec3(1, 0, -1), 0.5f, right);
-	scene.add<Sphere>(glm::vec3(-1, 0, -1), 0.5f, left);
+	scene.add<Sphere>(glm::vec3(0, 0.f, -1), 0.5f, center);
+	scene.add<Sphere>(glm::vec3(1, 0.f, -1), 0.5f, right);
+	scene.add<Sphere>(glm::vec3(-1, 0.5f, -1), 0.5f, left);
 	// scene.add<Sphere>(glm::vec3(-1, 0, -1), -0.4f, left);
-	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(1, 0, 2));
+	scene.addLight<PointLight>(glm::vec3(1.0f), 100, glm::vec3(-1, 3, -1));
 	scene.background = [](Ray r) {
 			return glm::vec3(0.05f);
 		};
 
-	Renderer renderer(400*a, 400);
+	BDPT renderer(400*a, 400);
+	// Renderer renderer(400*a, 400);
 	renderer.samples = 8;
 
 	Image im = renderer.render(camera, scene);

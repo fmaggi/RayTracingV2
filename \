@@ -3,9 +3,6 @@
 
 glm::vec3 BDPT::rayColor(Ray ray, const Aggregate* agg, const std::vector<Light*>& lights, uint32_t depth) const {
 	auto cameraPath = generateCameraSubpath(agg, ray, depth);
-	if (cameraPath.size() == 1) {
-		return background(ray);
-	}
 
 	// light = pickRandomLight(lights);
 	std::vector<Vertex> lightPath;
@@ -15,7 +12,7 @@ glm::vec3 BDPT::rayColor(Ray ray, const Aggregate* agg, const std::vector<Light*
 	//
 	glm::vec3 color{};
 	for (int t = 1; t < (int)cameraPath.size(); ++t) {
-		for (int s = 0; s < (int)lightPath.size(); ++s) {
+		for (int s = 2; s < (int)lightPath.size(); ++s) {
 			color += connectPaths(agg, cameraPath, t, lightPath, s);
 		}
 	}
@@ -31,9 +28,6 @@ float BDPT::G(Vertex cv, Vertex cl) const {
 }
 
 glm::vec3 BDPT::connectPaths(const Aggregate* agg, const std::vector<Vertex>& cameraPath, int t, const std::vector<Vertex>& lightPath, int s) const {
-	if (s == 0) {
-		return cameraPath[t].albedo;
-	}
 	Vertex cv = cameraPath[t];
 	Vertex cl = lightPath[s];
 	glm::vec3 dir = cv.hit.p - cl.hit.p;
@@ -49,17 +43,21 @@ glm::vec3 BDPT::connectPaths(const Aggregate* agg, const std::vector<Vertex>& ca
 	for (uint32_t i = 0; i < reflections; ++i) {
 		auto hit = agg->traverse(r, tMin, tMax);
 		if (!hit) {
+			return glm::vec3(0.0f);
+		}
+
+		if (hit->p == cv.hit.p) {
 			return color;
 		}
 
-		d = cv.hit.p - hit->p;
-		r = Ray(hit->p, d);
-
-		color *= hit->material->absortion(r, *hit);
+		r = hit->material->scatter(r, *hit);
+		if (glm::dot(r.direction, d) < 0) {
+			return glm::vec3(0.0f);
+		}
+		std::printf("con\n");
 	}
 
-
-	return color;
+	return glm::vec3(0.0f);
 }
 
 std::vector<BDPT::Vertex> BDPT::generateCameraSubpath(const Aggregate* agg, Ray startingRay, uint32_t depth) const {

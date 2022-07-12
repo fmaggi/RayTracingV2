@@ -4,7 +4,7 @@
 #include "utils/math.h"
 
 glm::vec3 PointLight::lightColor(glm::vec3 hitPoint, glm::vec3 hitNormal) const {
-	glm::vec3 lightDir = hitPoint - position;
+	glm::vec3 lightDir = hitPoint - pos;
 	float r2 = glm::dot(lightDir, lightDir);
 
 	float invDist = 1.0f / sqrtf(r2);
@@ -17,5 +17,5 @@ glm::vec3 PointLight::lightColor(glm::vec3 hitPoint, glm::vec3 hitNormal) const 
 }
 
 VisibilityTester PointLight::visibilityTester(glm::vec3 hitPoint) const {
-	return {position, hitPoint - position};
+	return {pos, hitPoint - pos};
 }

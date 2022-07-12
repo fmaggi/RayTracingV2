@@ -13,7 +13,8 @@ public:
 		: albedo(albedo) {}
 	virtual ~Material() {}
 	virtual Ray scatter(Ray ray, HitInfo hit) const = 0;
-	virtual glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const = 0;
+	virtual glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const { return glm::vec3(0.0f); }
+	virtual glm::vec3 absortion(Ray ray, HitInfo hit) const { return glm::vec3(0.0f); }
 	const glm::vec3 albedo;
 };
 
@@ -32,7 +33,7 @@ public:
 		: Material(color), fuzz(fuzz > 1 ? 1 : fuzz) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
-	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return glm::vec3(0.0f); }
+	glm::vec3 absortion(Ray ray, HitInfo info) const override;
 	const float fuzz;
 };
 
@@ -42,7 +43,7 @@ public:
 		: Material(albedo), ir(refraction) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
-	glm::vec3 attenuation(glm::vec3 wo, glm::vec3 wi) const override { return glm::vec3(0.0f); }
+	glm::vec3 absortion(Ray ray, HitInfo info) const override;
 	const float ir = 0;
 };
 

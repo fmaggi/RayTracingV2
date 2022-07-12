@@ -60,9 +60,9 @@ public:
 	const std::vector<Hittable*>& getHittables() const { return hittables; }
 	const std::vector<Light*>& getLights() const { return lights; }
 
-	std::function<glm::vec3 (Ray)> background;
+	std::function<glm::vec3 (Ray)> background{};
 private:
-	std::vector<Hittable*> hittables;
-	std::unordered_map<std::string, Material*> materials;
-	std::vector<Light*> lights;
+	std::vector<Hittable*> hittables{};
+	std::unordered_map<std::string, Material*> materials{};
+	std::vector<Light*> lights{};
 };

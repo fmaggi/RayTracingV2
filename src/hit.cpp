@@ -7,6 +7,6 @@ HitInfo::HitInfo(glm::vec3 point, float t, glm::vec3 normal, glm::vec3 hitDir, M
 	this->p = point;
 	this->material = material;
 	this->frontFace = glm::dot(hitDir, normal) < 0;
-	this->n = this->frontFace ? -normal : normal;
+	this->n = this->frontFace ? normal : -normal;
 	this->hitDir = hitDir;
 }

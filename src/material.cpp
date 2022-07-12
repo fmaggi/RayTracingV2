@@ -35,6 +35,17 @@ Ray Metal::scatter(Ray ray, HitInfo hit) const {
 	return Ray(hit.p, dir);
 }
 
+glm::vec3 Metal::absortion(Ray ray, HitInfo info) const {
+	if (!info.frontFace) {
+		return glm::vec3(0.0f);
+	}
+
+	if (glm::dot(glm::normalize(ray.direction), glm::normalize(info.n)) < 0.0f) {
+		return glm::vec3(0.0f);
+	}
+	return albedo;
+}
+
 Ray Dielectric::scatter(Ray ray, HitInfo hit) const {
 	const float refraction = hit.frontFace ? (1.0f/ir) : ir;
 
@@ -48,4 +59,8 @@ Ray Dielectric::scatter(Ray ray, HitInfo hit) const {
 		dir = refract(normDir, hit.n, refraction);
 	}
 	return Ray(hit.p, dir);
+}
+
+glm::vec3 Dielectric::absortion(Ray ray, HitInfo info) const {
+	return albedo;
 }

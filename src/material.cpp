@@ -1,6 +1,7 @@
 #include "material.h"
 
 #include "glm/geometric.hpp"
+#include "hit.h"
 #include "utils/math.h"
 
 static glm::vec3 reflect(glm::vec3 dir, glm::vec3 normal) {
@@ -24,18 +25,18 @@ static float shlickApprox(float cosI, float ir) {
 	return r0 + (1-r0)*pow((1-cosI), 5);
 }
 
-Ray Lambertian::scatter(Ray ray, HitInfo hit) const {
+std::optional<Ray> Lambertian::scatter(Ray ray, HitInfo hit) const {
 	glm::vec3 dir = hit.n + Math::randomInUnitSphere();
 	dir = Math::nearZero(dir) ? hit.n : dir;
 	return Ray(hit.p, dir);
 }
 
-Ray Metal::scatter(Ray ray, HitInfo hit) const {
+std::optional<Ray> Metal::scatter(Ray ray, HitInfo hit) const {
 	glm::vec3 dir = reflect(glm::normalize(ray.direction), hit.n) + fuzz * Math::randomInUnitSphere();
 	return Ray(hit.p, dir);
 }
 
-Ray Dielectric::scatter(Ray ray, HitInfo hit) const {
+std::optional<Ray> Dielectric::scatter(Ray ray, HitInfo hit) const {
 	const float refraction = hit.frontFace ? (1.0f/ir) : ir;
 
 	const glm::vec3 normDir = glm::normalize(ray.direction);
@@ -50,11 +51,6 @@ Ray Dielectric::scatter(Ray ray, HitInfo hit) const {
 	return Ray(hit.p, dir);
 }
 
-glm::vec3 Dielectric::absortion(Ray ray, HitInfo hit) const {
-	Ray s = scatter(ray, hit);
-	float dot = glm::dot(ray.direction, s.direction);
-	dot /= glm::length(ray.direction);
-	dot /= glm::length(s.direction);
-	float absDot = fmax(0.0f, dot);
-	return albedo * absDot;
+glm::vec3 Emissive::emit() const {
+	return albedo;
 }

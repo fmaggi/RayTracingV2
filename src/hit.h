@@ -2,7 +2,7 @@
 
 #include "glm/vec3.hpp"
 
-class Material;
+struct Material;
 
 struct HitInfo {
 	HitInfo() {}

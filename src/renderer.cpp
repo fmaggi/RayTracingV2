@@ -4,55 +4,34 @@
 
 #include "glm/geometric.hpp"
 #include "utils/math.h"
-#include "light.h"
 
-bool isBlack(glm::vec3 color) {
-	return color.r < 0.01 && color.g < 0.01 && color.b < 0.01;
-}
-
-glm::vec3 visible(Light* light, glm::vec3 from, const Aggregate* agg, uint32_t depth) {
-	glm::vec3 color(1.0f);
-	glm::vec3 p = from;
-	while (true) {
-		VisibilityTester tester = light->visibilityTester(p);
-		Ray shadowRay(p, -tester.lightDir);
-		float tMax = glm::length(tester.p - p);
-
-		auto hit = agg->traverse(shadowRay, 0.0001, tMax-0.001);
-		if (!hit) {
-			return color;
-		}
-
-		if (isBlack(color)) {
-			return color;
-		}
-
-		color *= hit->material->absortion(shadowRay, *hit);
-		p = hit->p;
-	}
-}
-
-glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Light*>& lights, uint32_t depth) const {
+glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Emissive*>& lights, uint32_t depth) const {
 	float tMin = 0.000001;
 	float tMax = Math::infinity;
 
-	auto hit = agg->traverse(ray, tMin, tMax);
-	if (!hit) {
-		return background(ray);
+	glm::vec3 radiance{};
+	glm::vec3 throughput(1.0f);
+
+	for (uint32_t i = 0; i < depth; ++i) {
+		auto hit = agg->traverse(ray, tMin, tMax);
+		if (!hit) {
+			radiance += background(ray);
+			return radiance * throughput;
+		}
+
+		radiance += hit->material->emit();
+
+		auto s = hit->material->scatter(ray, *hit);
+		if (!s) {
+			return radiance * throughput;
+		}
+
+		throughput *= hit->material->albedo;
+
+		ray = *s;
 	}
 
-	glm::vec3 lightColor{};
-	for (const auto& light : lights) {
-		glm::vec3 v = visible(light, hit->p, agg, 50);
-		lightColor += v * light->lightColor(hit->p, hit->n) * hit->material->attenuation(-ray.direction, glm::vec3(0));
-	}
-
-	if (depth > 0) {
-		Ray scattered = hit->material->scatter(ray, *hit);
-		lightColor += hit->material->albedo * rayColor(scattered, agg, lights, --depth);
-	}
-
-	return lightColor;
+	return radiance * throughput;
 }
 
 glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
@@ -67,7 +46,7 @@ glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
 	return glm::vec3{r, g, b};
 }
 
-Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Light*>& lights) const {
+Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Emissive*>& lights) const {
 	glm::vec3 color{};
 	for (uint32_t s = 0; s < samples; s++) {
 		glm::vec2 suv;

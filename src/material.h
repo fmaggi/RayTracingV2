@@ -33,7 +33,6 @@ public:
 		: Material(color), fuzz(fuzz > 1 ? 1 : fuzz) {}
 
 	Ray scatter(Ray ray, HitInfo hit) const override;
-	glm::vec3 absortion(Ray ray, HitInfo info) const override;
 	const float fuzz;
 };
 

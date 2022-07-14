@@ -6,6 +6,32 @@
 #include "utils/math.h"
 #include "light.h"
 
+bool isBlack(glm::vec3 color) {
+	return color.r < 0.01 && color.g < 0.01 && color.b < 0.01;
+}
+
+glm::vec3 visible(Light* light, glm::vec3 from, const Aggregate* agg, uint32_t depth) {
+	glm::vec3 color(1.0f);
+	glm::vec3 p = from;
+	while (true) {
+		VisibilityTester tester = light->visibilityTester(p);
+		Ray shadowRay(p, -tester.lightDir);
+		float tMax = glm::length(tester.p - p);
+
+		auto hit = agg->traverse(shadowRay, 0.0001, tMax-0.001);
+		if (!hit) {
+			return color;
+		}
+
+		if (isBlack(color)) {
+			return color;
+		}
+
+		color *= hit->material->absortion(shadowRay, *hit);
+		p = hit->p;
+	}
+}
+
 glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Light*>& lights, uint32_t depth) const {
 	float tMin = 0.000001;
 	float tMax = Math::infinity;
@@ -17,11 +43,8 @@ glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Li
 
 	glm::vec3 lightColor{};
 	for (const auto& light : lights) {
-		VisibilityTester tester = light->visibilityTester(hit->p);
-		Ray lightRay(hit->p, -tester.lightDir);
-		float lightMax = lightRay.tAt(tester.p);
-		float v = !agg->traverse(lightRay, tMin, lightMax);
-		lightColor += v * light->lightColor(hit->p, hit->n) * hit->material->attenuation(-ray.direction, -tester.lightDir);
+		glm::vec3 v = visible(light, hit->p, agg, 50);
+		lightColor += v * light->lightColor(hit->p, hit->n) * hit->material->attenuation(-ray.direction, glm::vec3(0));
 	}
 
 	if (depth > 0) {

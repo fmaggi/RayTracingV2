@@ -2,7 +2,7 @@
 
 #include "glm/glm.hpp"
 
-HitInfo::HitInfo(glm::vec3 point, float t, glm::vec3 normal, glm::vec3 hitDir, Material* material) {
+HitInfo::HitInfo(glm::vec3 point, float t, glm::vec3 normal, glm::vec3 hitDir, const Material* material) {
 	this->t = t;
 	this->p = point;
 	this->material = material;

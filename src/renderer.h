@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hit.h"
 #include "image.h"
 #include "Camera.h"
 #include "scene.h"
@@ -16,8 +17,9 @@ public:
 	uint32_t imageWidth = 0, imageHeight = 0;
 	uint32_t reflections = 50;
 protected:
-	virtual glm::vec3 rayColor(Ray ray, const Aggregate* agg, const std::vector<Emissive*>& lights, uint32_t depth) const;
-	Pixel shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Emissive*>& lights) const;
+	virtual glm::vec3 rayColor(Ray ray, const Aggregate* agg, const std::vector<Surface*>& lights, uint32_t depth) const;
+	Pixel shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Surface*>& lights) const;
+	glm::vec3 sampleLight(HitInfo hit, const Aggregate* agg, const std::vector<Surface*>& lights) const;
 
 	glm::vec3 gammaCorrectColor(glm::vec3 color) const;
 

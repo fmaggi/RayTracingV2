@@ -26,6 +26,12 @@ public:
 	Hittable* add(Args&&... args) {
 		Hittable* h = new T(std::forward<Args>(args)...);
 		hittables.push_back(h);
+		if constexpr (std::derived_from<T, Surface>) {
+			Surface* s = static_cast<Surface*>(h);
+			if (s->material->emissive) {
+				lights.push_back(s);
+			}
+		}
 		return h;
 	}
 
@@ -33,9 +39,6 @@ public:
 	Material* addMaterial(std::string name, Args&&... args) {
 		Material* m = new T(std::forward<Args>(args)...);
 		materials[name] = m;
-		if (m->emissive) {
-			lights.push_back(static_cast<Emissive*>(m));
-		}
 		return m;
 	}
 
@@ -50,11 +53,11 @@ public:
 	std::optional<HitInfo> traverse(Ray ray, float tMin, float tMax) const override;
 
 	const std::vector<Hittable*>& getHittables() const { return hittables; }
-	const std::vector<Emissive*>& getLights() const { return lights; }
+	const std::vector<Surface*>& getLights() const { return lights; }
 
 	std::function<glm::vec3 (Ray)> background{};
 private:
 	std::vector<Hittable*> hittables{};
 	std::unordered_map<std::string, Material*> materials{};
-	std::vector<Emissive*> lights{};
+	std::vector<Surface*> lights{};
 };

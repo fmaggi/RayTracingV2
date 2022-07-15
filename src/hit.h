@@ -6,12 +6,12 @@ struct Material;
 
 struct HitInfo {
 	HitInfo() {}
-	HitInfo(glm::vec3 point, float t, glm::vec3 normal, glm::vec3 hitDir, Material* material);
+	HitInfo(glm::vec3 point, float t, glm::vec3 normal, glm::vec3 hitDir, const Material* material);
 
 	glm::vec3 p;
 	glm::vec3 n;
 	glm::vec3 hitDir;
-	Material* material;
+	const Material* material;
 	float t;
 	bool frontFace;
 };

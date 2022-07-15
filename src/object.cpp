@@ -4,10 +4,10 @@
 #include "ray.h"
 
 std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const {
-	glm::vec3 oc = ray.origin - m_position;
+	glm::vec3 oc = ray.origin - position;
 	float a = glm::dot(ray.direction, ray.direction);
 	float half_b = glm::dot(oc, ray.direction);
-	float c = glm::dot(oc, oc) - m_radius*m_radius;
+	float c = glm::dot(oc, oc) - radius*radius;
 	float discriminant = half_b*half_b - a*c;
 
 	if (discriminant < 0) {
@@ -27,13 +27,17 @@ std::optional<HitInfo> Sphere::intersect(Ray ray, float tMin, float tMax) const 
 	}
 
 	glm::vec3 p = ray.at(t);
-	glm::vec3 n = (p - m_position) / m_radius;
-	HitInfo info(p, t, n, ray.direction, m_material);
+	glm::vec3 n = (p - position) / radius;
+	HitInfo info(p, t, n, ray.direction, material);
 	return info;
 }
 
 AABB Sphere::boundingBox() const {
-	glm::vec3 min = m_position - glm::vec3(fabs(m_radius));
-	glm::vec3 max = m_position + glm::vec3(fabs(m_radius));
+	glm::vec3 min = position - glm::vec3(fabs(radius));
+	glm::vec3 max = position + glm::vec3(fabs(radius));
 	return AABB(min, max);
+}
+
+glm::vec3 Sphere::limit(glm::vec3 direction) const {
+	return position - radius * direction;
 }

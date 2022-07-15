@@ -12,20 +12,20 @@ static Scene randomScene() {
 
 	for (int a = -11; a < 11; ++a) {
 		for (int b = -11; b < 11; ++b) {
-			float chooseMat = Math::random<float>();
-			glm::vec3 center(a + 0.9*Math::random<float>(), 0.2, b + 0.9*Math::random<float>());
+			float chooseMat = Random::Float();
+			glm::vec3 center(a + 0.9*Random::Float(), 0.2, b + 0.9*Random::Float());
 
 			if (glm::length(center - glm::vec3(4, 0.2, 0)) > 0.9) {
 				Material* material = nullptr;
 				std::string name = "asdfagshasdfasdgafsasdfkadasdnadsfñjaweasdf";
-				name[static_cast<int>(Math::random<float>(0.0f, 40.0f))] = 'a' + static_cast<int>(Math::random<float>(0, 100));
+				name[static_cast<int>(Random::Float(0.0f, 40.0f))] = 'a' + static_cast<int>(Random::Float(0, 100));
 
 				if (chooseMat < 0.8) {
-					glm::vec3 albedo = Math::random<glm::vec3>() * Math::random<glm::vec3>();
+					glm::vec3 albedo = Random::Vec3() * Random::Vec3();
 					material = scene.addMaterial<Lambertian>(name, albedo);
 				} else if (chooseMat < 0.95) {
-					glm::vec3 albedo = Math::random<glm::vec3>(0.5f, 1.0f);
-					material = scene.addMaterial<Metal>(name, albedo, Math::random<float>(0.f, 0.5f));
+					glm::vec3 albedo = Random::Vec3(0.5f, 1.0f);
+					material = scene.addMaterial<Metal>(name, albedo, Random::Float(0.f, 0.5f));
 				} else {
 					material = scene.addMaterial<Dielectric>(name, glm::vec3(1.0f), 1.5f);
 				}
@@ -71,20 +71,19 @@ int main(int argc, char** argv) {
 	Material* ground = scene.addMaterial<Lambertian>("g", glm::vec3(0.8, 0.8, 0.0));
 	Material* center = scene.addMaterial<Lambertian>("c", glm::vec3(0.1, 0.2, 0.5));
 	Material* right = scene.addMaterial<Metal>("r", glm::vec3(0.8, 0.6, 0.2));
-	Material* em = scene.addMaterial<Emissive>("e", glm::vec3(1.3), 1);
+	Material* em = scene.addMaterial<Emissive>("e", glm::vec3(1.f), 30);
 	scene.add<Sphere>(glm::vec3(0, -100.5f, -1), 100, ground);
-	// scene.add<Sphere>(glm::vec3(0, 0.f, -1), 0.5f, center);
+	scene.add<Sphere>(glm::vec3(0, 0.f, -1), 0.5f, center);
 	scene.add<Sphere>(glm::vec3(1, 0.f, -1), 0.5f, right);
 	scene.add<Sphere>(glm::vec3(-1, 0.5f, -1), 0.5f, left);
-	scene.add<Sphere>(glm::vec3(-1, 3.f, -1), 0.5f, em);
-	// scene.add<Sphere>(glm::vec3(-1, 0, -1), -0.4f, left);
+	scene.add<Sphere>(glm::vec3(1, 0., 2), 0.5f, em);
+	scene.add<Sphere>(glm::vec3(-1, 8, -1), 0.5f, em);
 	scene.background = [](Ray r) {
-			return glm::vec3(0.05f);
+			return glm::vec3(0.03f);
 		};
 
-//	BDPT renderer(400*a, 400);
 	Renderer renderer(400*a, 400);
-	renderer.samples = 50;
+	renderer.samples = 1024;
 
 	Image im = renderer.render(camera, scene);
 

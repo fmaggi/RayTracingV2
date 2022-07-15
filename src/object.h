@@ -2,16 +2,16 @@
 
 #include "hittable.h"
 
-class Sphere : public Hittable {
+class Sphere : public Surface {
 public:
 	Sphere(glm::vec3 position, float radius, Material* material)
-		: m_material(material), m_position(position), m_radius(radius) {}
+		: Surface(position, material), radius(radius) {}
 
 	std::optional<HitInfo> intersect(Ray ray, float tMin, float tMax) const override;
 	AABB boundingBox() const override;
 
+	glm::vec3 limit(glm::vec3 direction) const override;
+
 private:
-	Material* m_material;
-	glm::vec3 m_position;
-	float m_radius;
+	float radius;
 };

@@ -5,7 +5,7 @@
 #include "glm/geometric.hpp"
 #include "utils/math.h"
 
-glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Emissive*>& lights, uint32_t depth) const {
+glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Surface*>& lights, uint32_t depth) const {
 	float tMin = 0.000001;
 	float tMax = Math::infinity;
 
@@ -15,23 +15,49 @@ glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Em
 	for (uint32_t i = 0; i < depth; ++i) {
 		auto hit = agg->traverse(ray, tMin, tMax);
 		if (!hit) {
-			radiance += background(ray);
-			return radiance * throughput;
+			return radiance + background(ray) * throughput;
 		}
 
-		radiance += hit->material->emit();
+		radiance += hit->material->emit() * throughput;
 
 		auto s = hit->material->scatter(ray, *hit);
 		if (!s) {
 			return radiance * throughput;
 		}
 
+		radiance += sampleLight(*hit, agg, lights) * throughput;
 		throughput *= hit->material->albedo;
 
 		ray = *s;
 	}
 
 	return radiance * throughput;
+}
+
+glm::vec3 Renderer::sampleLight(HitInfo hit, const Aggregate* agg, const std::vector<Surface*>& lights) const {
+	if (lights.size() == 0) {
+		return glm::vec3(0.0f);
+	}
+
+	int index = lights.size() > 1 ? Random::Int(0, lights.size()-1) : 0;
+	Surface* light = lights[index];
+
+	glm::vec3 d = light->position - hit.p;
+	glm::vec3 normD = glm::normalize(d);
+	float r2 = glm::dot(d, d);
+
+	Ray shadowRay(hit.p, d);
+	float tMax = shadowRay.tAt(light->limit(normD));
+
+	float v = !agg->traverse(shadowRay, Math::almostZero, tMax - 0.001);
+
+	float p = glm::dot(normD, hit.n);
+	p = fmax(0.0f, p);
+
+	const Emissive* e = static_cast<const Emissive*>(light->material);
+	glm::vec3 color = p * e->albedo * e->intensity * Math::invPi * 0.25f / r2;
+
+	return v * color * hit.material->attenuation(hit.hitDir, glm::vec3(0.0f)) / (float)lights.size();
 }
 
 glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
@@ -46,12 +72,12 @@ glm::vec3 Renderer::gammaCorrectColor(glm::vec3 color) const {
 	return glm::vec3{r, g, b};
 }
 
-Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Emissive*>& lights) const {
+Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* agg, const std::vector<Surface*>& lights) const {
 	glm::vec3 color{};
 	for (uint32_t s = 0; s < samples; s++) {
 		glm::vec2 suv;
-		suv.x = (uv.x + Math::random<float>()) * invWidth;
-		suv.y = (uv.y + Math::random<float>()) * invHeight;
+		suv.x = (uv.x + Random::Float()) * invWidth;
+		suv.y = (uv.y + Random::Float()) * invHeight;
 		color += rayColor(camera.castRay(suv), agg, lights, reflections);
 	}
 	color = gammaCorrectColor(color);
@@ -94,7 +120,7 @@ Image Renderer::render(const Camera &camera, const Scene &scene) {
 
 	 auto ms_int = duration_cast<seconds>(stop-start);
 
-	 std::printf("%li\n", ms_int.count());
+	 std::printf("Done in %lis\n", ms_int.count());
 
 	return image;
 }

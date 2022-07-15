@@ -26,13 +26,13 @@ static float shlickApprox(float cosI, float ir) {
 }
 
 std::optional<Ray> Lambertian::scatter(Ray ray, HitInfo hit) const {
-	glm::vec3 dir = hit.n + Math::randomInUnitSphere();
+	glm::vec3 dir = hit.n + Random::InUnitSphere();
 	dir = Math::nearZero(dir) ? hit.n : dir;
 	return Ray(hit.p, dir);
 }
 
 std::optional<Ray> Metal::scatter(Ray ray, HitInfo hit) const {
-	glm::vec3 dir = reflect(glm::normalize(ray.direction), hit.n) + fuzz * Math::randomInUnitSphere();
+	glm::vec3 dir = reflect(glm::normalize(ray.direction), hit.n) + fuzz * Random::InUnitSphere();
 	return Ray(hit.p, dir);
 }
 
@@ -43,7 +43,7 @@ std::optional<Ray> Dielectric::scatter(Ray ray, HitInfo hit) const {
 	const float cosI = fmin(glm::dot(-normDir, hit.n), 1.0f);
 	const float sinI = sqrt(1 - cosI*cosI);
 	glm::vec3 dir;
-	if (refraction * sinI > 1.0f || shlickApprox(cosI, refraction) > Math::random<float>()) {
+	if (refraction * sinI > 1.0f || shlickApprox(cosI, refraction) > Random::Float()) {
 		dir = reflect(normDir, hit.n);
 	} else {
 		dir = refract(normDir, hit.n, refraction);
@@ -52,5 +52,5 @@ std::optional<Ray> Dielectric::scatter(Ray ray, HitInfo hit) const {
 }
 
 glm::vec3 Emissive::emit() const {
-	return albedo;
+	return albedo * intensity;
 }

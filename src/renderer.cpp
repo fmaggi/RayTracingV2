@@ -90,6 +90,7 @@ Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* 
 
 #include <chrono>
 #include <cstdio>
+#include <thread>
 
 using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
@@ -105,22 +106,33 @@ Image Renderer::render(const Camera &camera, const Scene &scene) {
 
 	BVHtree tree(scene.getHittables());
 
-	 auto start = high_resolution_clock::now();
+	uint32_t nThreads = std::jthread::hardware_concurrency();
+	std::vector<std::jthread*> threads(nThreads);
+	uint32_t rowsPerThread = imageHeight / nThreads;
 
-	for (uint32_t y = 0; y < imageHeight; y++) {
-		std::fprintf(stderr, "\rLine: %u", y);
-		for (uint32_t x = 0; x < imageWidth; x++) {
-			glm::vec2 uv = { x, y };
-			image.at(x, imageHeight-y-1) = shadePixel(uv, camera, &tree, scene.getLights());
-		}
+	auto start = high_resolution_clock::now();
+
+	for (uint32_t i = 0; i < nThreads; ++i) {
+		threads[i] = new std::jthread([this, &c=camera, &s=scene, &im=image, &t=tree](uint32_t i, uint32_t rows) {
+			for (uint32_t y = i*rows; y < (i+1)*rows; ++y) {
+				for (uint32_t x = 0; x < im.width; ++x) {
+					glm::vec2 uv = { x, y };
+					im.at(x, im.height-y-1) = this->shadePixel(uv, c, &t, s.getLights());
+				}
+			}
+		}, i, rowsPerThread);
 	}
-	std::printf("\n");
 
-	 auto stop = high_resolution_clock::now();
+	for (const auto& t : threads) {
+		t->join();
+		delete t;
+	}
 
-	 auto ms_int = duration_cast<seconds>(stop-start);
+	auto stop = high_resolution_clock::now();
 
-	 std::printf("Done in %lis\n", ms_int.count());
+	auto ms_int = duration_cast<seconds>(stop-start);
+
+	std::printf("Done in %lis\n", ms_int.count());
 
 	return image;
 }

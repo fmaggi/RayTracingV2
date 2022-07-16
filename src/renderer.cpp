@@ -107,21 +107,40 @@ Image Renderer::render(const Camera &camera, const Scene &scene) {
 	BVHtree tree(scene.getHittables());
 
 	uint32_t nThreads = std::jthread::hardware_concurrency();
+	std::printf("Rendering in %u threads\n", nThreads);
+
 	std::vector<std::jthread*> threads(nThreads);
+	std::vector<uint32_t> progress(nThreads);
+	for (uint32_t i = 0; i < nThreads; ++i) {
+		progress[i] = 0;
+	}
+
 	uint32_t rowsPerThread = imageHeight / nThreads;
 
 	auto start = high_resolution_clock::now();
 
 	for (uint32_t i = 0; i < nThreads; ++i) {
-		threads[i] = new std::jthread([this, &c=camera, &s=scene, &im=image, &t=tree](uint32_t i, uint32_t rows) {
+		threads[i] = new std::jthread([this, &c=camera, &s=scene, &im=image, &t=tree](uint32_t i, uint32_t rows, uint32_t* progress) {
 			for (uint32_t y = i*rows; y < (i+1)*rows; ++y) {
+				*progress += 1;
 				for (uint32_t x = 0; x < im.width; ++x) {
 					glm::vec2 uv = { x, y };
 					im.at(x, im.height-y-1) = this->shadePixel(uv, c, &t, s.getLights());
 				}
 			}
-		}, i, rowsPerThread);
+		}, i, rowsPerThread, progress.data() + i);
 	}
+
+	uint32_t p = 0;
+	while (p < rowsPerThread * nThreads) {
+		std::fprintf(stderr, "\rLine %u/%u", p+1, imageHeight);
+		p = 0;
+		for (uint32_t pi : progress) {
+			p += pi;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+	std::printf("\n");
 
 	for (const auto& t : threads) {
 		t->join();

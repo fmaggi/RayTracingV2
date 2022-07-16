@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 		};
 
 	Renderer renderer(400*a, 400);
-	renderer.samples = 100;
+	renderer.samples = 2000;
 
 	Image im = renderer.render(camera, scene);
 

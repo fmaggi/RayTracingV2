@@ -39,4 +39,5 @@ bin_int/*
 Makefile
 compile_commands.json
 .cache/*
-raytrace
+raytrace*
+.vscode

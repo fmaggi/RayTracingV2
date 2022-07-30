@@ -15,6 +15,7 @@ struct Image {
 
 	static constexpr uint64_t pixelSize = sizeof(Pixel);
 
+	Image() {}
 	Image(uint32_t w, uint32_t h)
 		: width(w), height(h), pixels(new Pixel[w * h]) {}
 
@@ -26,6 +27,13 @@ struct Image {
 		return pixels[x + y*width];
 	}
 
-	uint32_t width = 0, height;
+	void resize(uint32_t w, uint32_t h) {
+		delete[] pixels;
+		pixels = new Pixel[w * h];
+		width = w;
+		height = h;
+	}
+
+	uint32_t width = 0, height = 0;
 	Pixel* pixels = nullptr;
 };

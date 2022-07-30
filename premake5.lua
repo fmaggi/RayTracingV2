@@ -1,24 +1,12 @@
 output_dir = '%{cfg.buildcfg}_%{cfg.architecture}_%{cfg.system}'
 
 workspace 'RayTrace'
-	startproject		'raytrace'
+	startproject		'App'
 	architecture		'x64'
-	configurations		{ 'Debug', 'Development', 'Release' }
-	flags				'MultiProcessorCompile'
-	language			'C++'
-	cppdialect			'C++latest'
-	conformancemode		'On'
-	exceptionhandling	'Off'
-	warnings			'Extra'
-	floatingpoint		'Fast'
-	staticruntime		'On'
 
-	files {
-			'src/**.cpp',
-			'src/**.h',
-			'vendor/glm/glm/**.hpp',
-			'vendor/glm/glm/**.inl'
-	}
+	configurations		{ 'Debug', 'Development', 'Release' }
+
+	flags				'MultiProcessorCompile'
 
 	debugdir			('bin/'	 .. output_dir .. '/%{prj.name}')
 	targetdir			('bin/'	 .. output_dir .. '/%{prj.name}')
@@ -46,8 +34,6 @@ workspace 'RayTrace'
 	filter "system:linux"
 		toolset("clang")
 
-project 'raytrace'
-	location			'src'
-	kind				'ConsoleApp'
-	includedirs			{ '', 'src', 'vendor/glm'}
-
+include 'vendor'
+include 'Raytracing'
+include 'App'

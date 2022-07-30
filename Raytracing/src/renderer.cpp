@@ -4,6 +4,16 @@
 
 #include "glm/geometric.hpp"
 #include "utils/math.h"
+#include <ctime>
+
+Renderer::~Renderer() {
+	for (const auto& t : threads) {
+		if (t->joinable()) {
+			t->join();
+		}
+		delete t;
+	}
+}
 
 glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Surface*>& lights, uint32_t depth) const {
 	float tMin = 0.000001;
@@ -88,72 +98,63 @@ Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* 
 	return pixel;
 }
 
-#include <chrono>
 #include <cstdio>
-#include <thread>
 
-using std::chrono::high_resolution_clock;
-using std::chrono::duration_cast;
-using std::chrono::seconds;
+const Image& Renderer::render(const Camera &camera, const Scene &scene) {
+	if (imageWidth == 0 || imageHeight == 0) {
+		return image;
+	}
 
-Image Renderer::render(const Camera &camera, const Scene &scene) {
-	Image image(imageWidth, imageHeight);
+	image.resize(imageWidth, imageHeight);
 
 	invWidth = 1.0f / imageWidth;
 	invHeight = 1.0f / imageHeight;
 	invSamples = 1.0f / samples;
 	background = scene.background;
 
-	BVHtree tree(scene.getHittables());
+	BVHtree* tree = new BVHtree(scene.getHittables());
 
-	uint32_t nThreads = std::jthread::hardware_concurrency();
+	if (nThreads == 0) {
+		nThreads = std::jthread::hardware_concurrency();
+	}
 	std::printf("Rendering in %u threads\n", nThreads);
 
-	std::vector<std::jthread*> threads(nThreads);
-	std::vector<uint32_t> progress(nThreads);
 	for (uint32_t i = 0; i < nThreads; ++i) {
-		progress[i] = 0;
+		progress.push_back(0);
 	}
 
 	uint32_t rowsPerThread = imageHeight / nThreads;
-
-	auto start = high_resolution_clock::now();
+	total = rowsPerThread * nThreads;
 
 	for (uint32_t i = 0; i < nThreads; ++i) {
-		threads[i] = new std::jthread([this, &c=camera, &s=scene, &im=image, &t=tree](uint32_t i, uint32_t rows, uint32_t* progress) {
+		threads.push_back(new std::jthread([this, &c=camera, &s=scene, &im=image, t=tree](uint32_t i, uint32_t rows, uint32_t* progress) {
 			for (uint32_t y = i*rows; y < (i+1)*rows; ++y) {
 				*progress += 1;
 				for (uint32_t x = 0; x < im.width; ++x) {
 					glm::vec2 uv = { x, y };
-					im.at(x, im.height-y-1) = this->shadePixel(uv, c, &t, s.getLights());
+					im.at(x, im.height-y-1) = this->shadePixel(uv, c, t, s.getLights());
 				}
 			}
-		}, i, rowsPerThread, progress.data() + i);
+		}, i, rowsPerThread, progress.data() + i));
+		threads[i]->detach();
 	}
-
-	uint32_t p = 0;
-	while (p < rowsPerThread * nThreads) {
-		std::fprintf(stderr, "\rLine %u/%u", p+1, imageHeight);
-		p = 0;
-		for (uint32_t pi : progress) {
-			p += pi;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-	std::printf("\n");
-
-	for (const auto& t : threads) {
-		t->join();
-		delete t;
-	}
-
-	auto stop = high_resolution_clock::now();
-
-	auto ms_int = duration_cast<seconds>(stop-start);
-
-	std::printf("Done in %lis\n", ms_int.count());
 
 	return image;
 }
 
+uint32_t Renderer::renderedRows() const {
+	uint32_t p = 0;
+	for (uint32_t pi : progress) {
+		p += pi;
+	}
+	return p;
+}
 
+void Renderer::wait() const {
+	for (const auto& t : threads) {
+		if (t->joinable()) {
+			t->join();
+		}
+	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+}

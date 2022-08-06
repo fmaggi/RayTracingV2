@@ -3,11 +3,13 @@
 #include <cstdint>
 
 struct Pixel {
+	Pixel()
+		: r(0), g(0), b(0), a(255){}
 	union {
 		struct {
-			uint8_t r, g, b;
+			uint8_t r, g, b, a;
 		};
-		uint8_t value[3];
+		uint8_t value[4];
 	};
 };
 

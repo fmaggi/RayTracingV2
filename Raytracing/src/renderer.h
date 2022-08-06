@@ -5,16 +5,16 @@
 #include "camera.h"
 #include "scene.h"
 
-#include <thread>
-
 class Renderer {
 public:
 	~Renderer();
 
 	const Image& render(const Camera& camera, const Scene& scene);
+	const Image& getImage() { return image; }
 
-	uint32_t renderedRows() const;
-	void wait() const;
+	uint32_t rowsToGo() const;
+	void wait();
+	bool working() const { return rowsToGo() > 0; }
 
 	uint32_t samples = 8;
 	uint32_t imageWidth = 0, imageHeight = 0;
@@ -36,6 +36,6 @@ protected:
 	Image image;
 
 	std::vector<uint32_t> progress;
-	std::vector<std::jthread*> threads;
 	uint32_t total = 0;
+	Aggregate* agg = nullptr;
 };

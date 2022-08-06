@@ -18,7 +18,7 @@ project 'ImGui'
 		'imgui/imstb_rectpack.h',
 		'imgui/imstb_textedit.h',
 		'imgui/imstb_truetype.h',
-		'imgui/imgui_demo.cpp'
+		'imgui/imgui_demo.cpp',
 	}
 
 project 'GLFW'
@@ -27,25 +27,34 @@ project 'GLFW'
 	kind 'StaticLib'
 
 	language 'C'
-	staticruntime 'off'
+	staticruntime 'on'
 
 	files {
 		'GLFW/include/GLFW/glfw3.h',
-		'GLFW/include/GLFW/glfw3native.h',
-		'GLFW/src/glfw_config.h',
-		'GLFW/src/context.c',
-		'GLFW/src/init.c',
-		'GLFW/src/input.c',
-		'GLFW/src/monitor.c',
+    'GLFW/include/GLFW/glfw3native.h',
+    'GLFW/src/internal.h',
+    'GLFW/src/platform.h',
+    'GLFW/src/mappings.h',
+    'GLFW/src/context.c',
+    'GLFW/src/init.c',
+    'GLFW/src/input.c',
+    'GLFW/src/monitor.c',
+    'GLFW/src/platform.c',
+    'GLFW/src/window.c',
+    'GLFW/src/egl_context.c',
+		'GLFW/src/glx_context.c',
+    'GLFW/src/osmesa_context.c',
+    'GLFW/src/null_platform.h',
+    'GLFW/src/null_joystick.h',
+    'GLFW/src/null_init.c',
 
-		'GLFW/src/null_init.c',
-		'GLFW/src/null_joystick.c',
-		'GLFW/src/null_monitor.c',
-		'GLFW/src/null_window.c',
+    'GLFW/src/null_monitor.c',
+    'GLFW/src/null_window.c',
+    'GLFW/src/null_joystick.c',
 
-		'GLFW/src/platform.c',
-		'GLFW/src/window.c',
+		'GLFW/src/vulkan.c'
 	}
+
 
 	filter 'system:linux'
 		pic 'On'
@@ -59,8 +68,8 @@ project 'GLFW'
 			'GLFW/src/xkb_unicode.c',
 			'GLFW/src/posix_time.c',
 			'GLFW/src/posix_thread.c',
-			'GLFW/src/glx_context.c',
-			'GLFW/src/egl_context.c',
+			'GLFW/src/posix_module.c',
+			'GLFW/src/posix_poll.c',
 			'GLFW/src/osmesa_context.c',
 			'GLFW/src/linux_joystick.c'
 		}

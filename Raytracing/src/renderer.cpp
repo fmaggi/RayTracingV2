@@ -7,12 +7,7 @@
 #include <ctime>
 
 Renderer::~Renderer() {
-	for (const auto& t : threads) {
-		if (t->joinable()) {
-			t->join();
-		}
-		delete t;
-	}
+	wait();
 }
 
 glm::vec3 Renderer::rayColor(Ray ray, const Aggregate* agg, const std::vector<Surface*>& lights, uint32_t depth) const {
@@ -99,9 +94,16 @@ Pixel Renderer::shadePixel(glm::vec2 uv, const Camera& camera, const Aggregate* 
 }
 
 #include <cstdio>
+#include <thread>
 
 const Image& Renderer::render(const Camera &camera, const Scene &scene) {
+	if (rowsToGo() > 0) {
+		std::printf("Already at work!\n");
+		return image;
+	}
+
 	if (imageWidth == 0 || imageHeight == 0) {
+		std::printf("Invalid image size (%u, %u)\n", imageWidth, imageHeight);
 		return image;
 	}
 
@@ -112,49 +114,53 @@ const Image& Renderer::render(const Camera &camera, const Scene &scene) {
 	invSamples = 1.0f / samples;
 	background = scene.background;
 
-	BVHtree* tree = new BVHtree(scene.getHittables());
+	delete agg;
+	agg = new BVHtree(scene.getHittables());
 
 	if (nThreads == 0) {
-		nThreads = std::jthread::hardware_concurrency();
+		nThreads = std::jthread::hardware_concurrency()-1;
 	}
 	std::printf("Rendering in %u threads\n", nThreads);
 
+	progress.clear();
 	for (uint32_t i = 0; i < nThreads; ++i) {
 		progress.push_back(0);
 	}
 
 	uint32_t rowsPerThread = imageHeight / nThreads;
-	total = rowsPerThread * nThreads;
+	total = image.height;
 
 	for (uint32_t i = 0; i < nThreads; ++i) {
-		threads.push_back(new std::jthread([this, &c=camera, &s=scene, &im=image, t=tree](uint32_t i, uint32_t rows, uint32_t* progress) {
-			for (uint32_t y = i*rows; y < (i+1)*rows; ++y) {
+		auto start = i * rowsPerThread;
+		auto end = i < nThreads-1 ? (i+1)*rowsPerThread : image.height;
+		std::thread t([this, &c=camera, &s=scene](uint32_t start, uint32_t end, uint32_t* progress) {
+			for (uint32_t y = start; y < end; ++y) {
 				*progress += 1;
-				for (uint32_t x = 0; x < im.width; ++x) {
+				for (uint32_t x = 0; x < this->image.width; ++x) {
 					glm::vec2 uv = { x, y };
-					im.at(x, im.height-y-1) = this->shadePixel(uv, c, t, s.getLights());
+					this->image.at(x, this->image.height-y-1) = this->shadePixel(uv, c, this->agg, s.getLights());
 				}
 			}
-		}, i, rowsPerThread, progress.data() + i));
-		threads[i]->detach();
+		}, start, end, progress.data() + i);
+		t.detach();
 	}
 
 	return image;
 }
 
-uint32_t Renderer::renderedRows() const {
+uint32_t Renderer::rowsToGo() const {
 	uint32_t p = 0;
 	for (uint32_t pi : progress) {
 		p += pi;
 	}
-	return p;
+	return total - p;
 }
 
-void Renderer::wait() const {
-	for (const auto& t : threads) {
-		if (t->joinable()) {
-			t->join();
-		}
+void Renderer::wait() {
+	while (rowsToGo() > 1) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(50));
+	delete agg;
+	agg = nullptr;
 }

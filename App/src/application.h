@@ -13,8 +13,10 @@ public:
     void run();
 private:
     Application(ApplicationSpecification spec);
+    void Init();
     static inline Application* app = nullptr;
 
-    bool running = false;
     ApplicationSpecification spec;
+    void* window = nullptr;
+    uint32_t width=0, height=0;
 };

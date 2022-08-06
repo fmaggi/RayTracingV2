@@ -1,7 +1,7 @@
 project 'App'
-    kind 'ConsoleApp'
+  kind 'ConsoleApp'
 
-    language			'C++'
+  language			'C++'
 	cppdialect			'C++latest'
 	conformancemode		'On'
 	exceptionhandling	'Off'
@@ -9,7 +9,7 @@ project 'App'
 	floatingpoint		'Fast'
 	staticruntime 'On'
 
-    files { 'src/**.cpp', 'src/**.h' }
+  files { 'src/**.cpp', 'src/**.h', '../vendor/imgui/backends/imgui_impl_glfw.cpp', '../vendor/imgui/backends/imgui_impl_opengl3.cpp' }
 	includedirs	{ 'src', '../Raytracing', '../vendor/imgui', '../vendor/glm', '../vendor/GLFW/include' }
 
-    links { 'Raytracing', 'ImGui', 'GLFW' }
+  links { 'Raytracing', 'GLFW', 'ImGui', 'm', 'GL', 'X11', 'pthread', 'Xrandr', 'Xi', 'dl' } -- linux only for now

@@ -4,7 +4,6 @@
 
 #include "glm/geometric.hpp"
 #include "utils/math.h"
-#include <ctime>
 
 Renderer::~Renderer() {
 	wait();

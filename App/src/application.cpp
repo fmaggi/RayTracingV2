@@ -1,18 +1,13 @@
 #include "application.h"
-#include <GL/gl.h>
-#include <iostream>
 
 #include "Raytracing.h"
-
-#include <chrono>
-using std::chrono::high_resolution_clock;
-using std::chrono::seconds;
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 static int createTexture() {
 	int tID;
@@ -30,15 +25,14 @@ static void loadTextureData(int tID, const Image& image) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width, image.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.pixels);
 }
 
-Application* Application::Create(ApplicationSpecification spec) {
+Application* Application::Create() {
 	if (app == nullptr) {
-		app = new Application(spec);
+		app = new Application();
 	}
 	return app;
 }
 
-Application::Application(ApplicationSpecification spec) {
-	this->spec = spec;
+Application::Application() {
 	Init();
 }
 
@@ -121,7 +115,6 @@ void Application::run() {
 	scene.add<Sphere>(glm::vec3(0, 0.f, -1), 0.5f, center);
 	scene.add<Sphere>(glm::vec3(1, 0.f, -1), 0.5f, right);
 	scene.add<Sphere>(glm::vec3(-1, 0.5f, -1), 0.5f, left);
-	scene.add<Sphere>(glm::vec3(-1, 0.5f, -1), -0.4f, left);
 	scene.add<Sphere>(glm::vec3(1, 0., 2), 0.5f, em);
 	scene.add<Sphere>(glm::vec3(-1, 8, -1), 0.5f, em);
 	scene.background = [](Ray r) {
@@ -174,20 +167,6 @@ void Application::run() {
 				ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 			}
 
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-			ImGui::Begin("Viewport");
-
-			width = ImGui::GetContentRegionAvail().x;
-			height = ImGui::GetContentRegionAvail().y;
-
-			ImVec2 size;
-			size.x = image.width;
-			size.y = image.height;
-			ImGui::Image((void*)tID, size);
-
-			ImGui::End();
-
-			ImGui::PopStyleVar();
 			ImGui::Begin("Settings");
 
 			loadTextureData(tID, image);
@@ -199,11 +178,70 @@ void Application::run() {
 				}
 			}
 
+			ImGui::Separator();
+
+			ImGui::SliderInt("Image Height", (int*)&renderer.imageHeight, 100, 1200);
+			renderer.imageWidth = renderer.imageHeight * a;
+
 			ImGui::SliderInt("Samples", (int*)&renderer.samples, 5, 5000);
 
-			ImGui::Text("Image size %u %u", image.width, image.height);
+			ImGui::Separator();
+
+			static bool savePopUp = false;
+
+			if (ImGui::Button("Save")) {
+				savePopUp = true;
+			}
+
+			if (savePopUp) {
+				ImGui::Begin("File Saver");
+				static char filename[255];
+				ImGui::InputText("Filename", filename, sizeof(filename));
+
+				if (ImGui::Button("Ok")) {
+					std::string path = "output/" + std::string(filename);
+					FILE* im = std::fopen(path.c_str(), "wb");
+					std::fprintf(im, "P6\n%i %i\n255\n", image.width, image.height);
+					uint8_t* p = new uint8_t[3 * image.width * image.height];
+					for (uint32_t i = 0; i < image.width * image.height; i++) {
+						p[i*3 + 0] = image.pixels[i].r;
+						p[i*3 + 1] = image.pixels[i].g;
+						p[i*3 + 2] = image.pixels[i].b;
+					}
+					std::fwrite(p, 3 * sizeof(uint8_t) , image.width*image.height, im);
+					delete[] p;
+					savePopUp = false;
+				}
+
+				if (ImGui::Button("Cancel")) {
+					savePopUp = false;
+				}
+
+				ImGui::End();
+			}
 
 			ImGui::End();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+			ImGui::Begin("Viewport");
+
+			auto w = ImGui::GetContentRegionAvail().x;
+			auto h = ImGui::GetContentRegionAvail().y;
+
+			if (h * a > w) {
+				h = w / a;
+			} else {
+				w = h * a;
+			}
+
+			ImVec2 size;
+			size.x = w;
+			size.y = h;
+			ImGui::Image((void*)tID, size);
+
+			ImGui::End();
+
+			ImGui::PopStyleVar();
 
 			ImGui::End();
 		}
@@ -235,9 +273,4 @@ void Application::run() {
 	glfwDestroyWindow((GLFWwindow*)window);
 	glfwTerminate();
 
-	// Need to change format from RGBA to RGB to save it as a ppm
-	// std::string path = "output/" + spec.outputFile;
-	// FILE* im = std::fopen(path.c_str(), "wb");
-	// std::fprintf(im, "P6\n%i %i\n255\n", image.width, image.height);
-	// std::fwrite(image.pixels, image.pixelSize, image.width*image.height, im);
 }
